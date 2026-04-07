@@ -1,0 +1,856 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1938FCEBCE4324068E719E19 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A69ACA5B97B3928BBE762DC6 /* Foundation.framework */; };
+		38A101A4E5F02C485E0CD65E /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */; };
+		4940134C4B0533D5B818FFD3 /* QuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694A3755D18BF926692B89F6 /* QuickCaptureView.swift */; };
+		8DE4FB0E415459F93A86805D /* NoteDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */; };
+		A1B2C3D42F90000100000004 /* SecondBrainDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000002 /* SecondBrainDomain */; };
+		A1B2C3D42F90000100000005 /* SecondBrainComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000003 /* SecondBrainComposition */; };
+		A1B2C3D42F90000100000006 /* SecondBrainDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000002 /* SecondBrainDomain */; };
+		A1B2C3D42F90000100000007 /* SecondBrainComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000003 /* SecondBrainComposition */; };
+		AF60CDCD3816537FF75EE081 /* SecondBrainWatchSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0140FFEDF02EEA61183EF5E7 /* SecondBrainWatchSupport.swift */; };
+		B18A00012F90000100000001 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = B18A00012F90000100000003 /* SnapshotTesting */; };
+		C776D674C4FDE2BF925C868D /* AskNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A906639BC68002AE319E9C /* AskNotesView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		12AEEB922F82C0BC00B581E1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 12AEEB782F82C0BB00B581E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 12AEEB7F2F82C0BB00B581E1;
+			remoteInfo = "SecondBrain";
+		};
+		12AEEB9C2F82C0BC00B581E1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 12AEEB782F82C0BB00B581E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 12AEEB7F2F82C0BB00B581E1;
+			remoteInfo = "SecondBrain";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0140FFEDF02EEA61183EF5E7 /* SecondBrainWatchSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecondBrainWatchSupport.swift; path = "SecondBrain/WatchSupport/SecondBrainWatchSupport.swift"; sourceTree = "<group>"; };
+		031121AB141E0D136658309F /* SecondBrainWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SecondBrainWatch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		10A906639BC68002AE319E9C /* AskNotesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AskNotesView.swift; path = "SecondBrain/Features/Assistant/AskNotesView.swift"; sourceTree = "<group>"; };
+		12AEEB802F82C0BB00B581E1 /* SecondBrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SecondBrain.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		12AEEB912F82C0BC00B581E1 /* SecondBrainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SecondBrainTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		12AEEB9B2F82C0BC00B581E1 /* SecondBrainUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SecondBrainUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		694A3755D18BF926692B89F6 /* QuickCaptureView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickCaptureView.swift; path = "SecondBrain/Features/Notes/QuickCaptureView.swift"; sourceTree = "<group>"; };
+		9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NotesListView.swift; path = "SecondBrain/Features/Notes/NotesListView.swift"; sourceTree = "<group>"; };
+		A69ACA5B97B3928BBE762DC6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NoteDetailView.swift; path = "SecondBrain/Features/Notes/NoteDetailView.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		12AEEBA32F82C0BC00B581E1 /* Exceptions for "SecondBrain" folder in "SecondBrain" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 12AEEB7F2F82C0BB00B581E1 /* SecondBrain */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		12AEEB822F82C0BB00B581E1 /* SecondBrain */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				12AEEBA32F82C0BC00B581E1 /* Exceptions for "SecondBrain" folder in "SecondBrain" target */,
+			);
+			path = "SecondBrain";
+			sourceTree = "<group>";
+		};
+		12AEEB942F82C0BC00B581E1 /* SecondBrainTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = "SecondBrainTests";
+			sourceTree = "<group>";
+		};
+		12AEEB9E2F82C0BC00B581E1 /* SecondBrainUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = "SecondBrainUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		12AEEB7D2F82C0BB00B581E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D42F90000100000004 /* SecondBrainDomain in Frameworks */,
+				A1B2C3D42F90000100000005 /* SecondBrainComposition in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB8E2F82C0BC00B581E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B18A00012F90000100000001 /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB982F82C0BC00B581E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B3DBFD89BF411499BEF0450 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1938FCEBCE4324068E719E19 /* Foundation.framework in Frameworks */,
+				A1B2C3D42F90000100000006 /* SecondBrainDomain in Frameworks */,
+				A1B2C3D42F90000100000007 /* SecondBrainComposition in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12AEEB772F82C0BB00B581E1 = {
+			isa = PBXGroup;
+			children = (
+				12AEEB822F82C0BB00B581E1 /* SecondBrain */,
+				12AEEB942F82C0BC00B581E1 /* SecondBrainTests */,
+				12AEEB9E2F82C0BC00B581E1 /* SecondBrainUITests */,
+				12AEEB812F82C0BB00B581E1 /* Products */,
+				3B1B10DC1112161482B27FB4 /* Frameworks */,
+				89374C772EDDB40D2B0DF693 /* SecondBrainWatch Sources */,
+			);
+			sourceTree = "<group>";
+		};
+		12AEEB812F82C0BB00B581E1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				12AEEB802F82C0BB00B581E1 /* SecondBrain.app */,
+				12AEEB912F82C0BC00B581E1 /* SecondBrainTests.xctest */,
+				12AEEB9B2F82C0BC00B581E1 /* SecondBrainUITests.xctest */,
+				031121AB141E0D136658309F /* SecondBrainWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3B1B10DC1112161482B27FB4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F47925C8686EA9A692379130 /* watchOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		89374C772EDDB40D2B0DF693 /* SecondBrainWatch Sources */ = {
+			isa = PBXGroup;
+			children = (
+				10A906639BC68002AE319E9C /* AskNotesView.swift */,
+				D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */,
+				9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */,
+				694A3755D18BF926692B89F6 /* QuickCaptureView.swift */,
+				0140FFEDF02EEA61183EF5E7 /* SecondBrainWatchSupport.swift */,
+			);
+			name = "SecondBrainWatch Sources";
+			sourceTree = "<group>";
+		};
+		F47925C8686EA9A692379130 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				A69ACA5B97B3928BBE762DC6 /* Foundation.framework */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		12AEEB7F2F82C0BB00B581E1 /* SecondBrain */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12AEEBA42F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrain" */;
+			buildPhases = (
+				12AEEB7C2F82C0BB00B581E1 /* Sources */,
+				12AEEB7D2F82C0BB00B581E1 /* Frameworks */,
+				12AEEB7E2F82C0BB00B581E1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				12AEEB822F82C0BB00B581E1 /* SecondBrain */,
+			);
+			name = "SecondBrain";
+			packageProductDependencies = (
+				A1B2C3D42F90000100000002 /* SecondBrainDomain */,
+				A1B2C3D42F90000100000003 /* SecondBrainComposition */,
+			);
+			productName = "SecondBrain";
+			productReference = 12AEEB802F82C0BB00B581E1 /* SecondBrain.app */;
+			productType = "com.apple.product-type.application";
+		};
+		12AEEB902F82C0BC00B581E1 /* SecondBrainTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12AEEBA92F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrainTests" */;
+			buildPhases = (
+				12AEEB8D2F82C0BC00B581E1 /* Sources */,
+				12AEEB8E2F82C0BC00B581E1 /* Frameworks */,
+				12AEEB8F2F82C0BC00B581E1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				12AEEB932F82C0BC00B581E1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				12AEEB942F82C0BC00B581E1 /* SecondBrainTests */,
+			);
+			name = "SecondBrainTests";
+			packageProductDependencies = (
+				B18A00012F90000100000003 /* SnapshotTesting */,
+			);
+			productName = "SecondBrainTests";
+			productReference = 12AEEB912F82C0BC00B581E1 /* SecondBrainTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		12AEEB9A2F82C0BC00B581E1 /* SecondBrainUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 12AEEBAC2F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrainUITests" */;
+			buildPhases = (
+				12AEEB972F82C0BC00B581E1 /* Sources */,
+				12AEEB982F82C0BC00B581E1 /* Frameworks */,
+				12AEEB992F82C0BC00B581E1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				12AEEB9D2F82C0BC00B581E1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				12AEEB9E2F82C0BC00B581E1 /* SecondBrainUITests */,
+			);
+			name = "SecondBrainUITests";
+			productName = "SecondBrainUITests";
+			productReference = 12AEEB9B2F82C0BC00B581E1 /* SecondBrainUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		77F8CCE8E9E299EA54F4A57D /* SecondBrainWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06EBFD4ED1CC5DC73D96ECD7 /* Build configuration list for PBXNativeTarget "SecondBrainWatch" */;
+			buildPhases = (
+				E140537E928DBCD00D0B2CCC /* Sources */,
+				6B3DBFD89BF411499BEF0450 /* Frameworks */,
+				7195B7FC08BCF1227B600794 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "SecondBrainWatch";
+			packageProductDependencies = (
+				A1B2C3D42F90000100000002 /* SecondBrainDomain */,
+				A1B2C3D42F90000100000003 /* SecondBrainComposition */,
+			);
+			productName = "SecondBrainWatch";
+			productReference = 031121AB141E0D136658309F /* SecondBrainWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		12AEEB782F82C0BB00B581E1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					12AEEB7F2F82C0BB00B581E1 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					12AEEB902F82C0BC00B581E1 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 12AEEB7F2F82C0BB00B581E1;
+					};
+					12AEEB9A2F82C0BC00B581E1 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 12AEEB7F2F82C0BB00B581E1;
+					};
+				};
+			};
+			buildConfigurationList = 12AEEB7B2F82C0BB00B581E1 /* Build configuration list for PBXProject "SecondBrain" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 12AEEB772F82C0BB00B581E1;
+			packageReferences = (
+				A1B2C3D42F90000100000001 /* XCLocalSwiftPackageReference "../Packages/SecondBrainModules" */,
+				B18A00012F90000100000002 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+			);
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 12AEEB812F82C0BB00B581E1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				12AEEB7F2F82C0BB00B581E1 /* SecondBrain */,
+				12AEEB902F82C0BC00B581E1 /* SecondBrainTests */,
+				12AEEB9A2F82C0BC00B581E1 /* SecondBrainUITests */,
+				77F8CCE8E9E299EA54F4A57D /* SecondBrainWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		12AEEB7E2F82C0BB00B581E1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB8F2F82C0BC00B581E1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB992F82C0BC00B581E1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7195B7FC08BCF1227B600794 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		12AEEB7C2F82C0BB00B581E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB8D2F82C0BC00B581E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12AEEB972F82C0BC00B581E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E140537E928DBCD00D0B2CCC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C776D674C4FDE2BF925C868D /* AskNotesView.swift in Sources */,
+				8DE4FB0E415459F93A86805D /* NoteDetailView.swift in Sources */,
+				38A101A4E5F02C485E0CD65E /* NotesListView.swift in Sources */,
+				4940134C4B0533D5B818FFD3 /* QuickCaptureView.swift in Sources */,
+				AF60CDCD3816537FF75EE081 /* SecondBrainWatchSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A1B2C3D42F90000100000001 /* XCLocalSwiftPackageReference "../Packages/SecondBrainModules" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/SecondBrainModules;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B18A00012F90000100000002 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.19.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1B2C3D42F90000100000002 /* SecondBrainDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D42F90000100000001 /* XCLocalSwiftPackageReference "../Packages/SecondBrainModules" */;
+			productName = SecondBrainDomain;
+		};
+		A1B2C3D42F90000100000003 /* SecondBrainComposition */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D42F90000100000001 /* XCLocalSwiftPackageReference "../Packages/SecondBrainModules" */;
+			productName = SecondBrainComposition;
+		};
+		B18A00012F90000100000003 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B18A00012F90000100000002 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin PBXTargetDependency section */
+		12AEEB932F82C0BC00B581E1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 12AEEB7F2F82C0BB00B581E1 /* SecondBrain */;
+			targetProxy = 12AEEB922F82C0BC00B581E1 /* PBXContainerItemProxy */;
+		};
+		12AEEB9D2F82C0BC00B581E1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 12AEEB7F2F82C0BB00B581E1 /* SecondBrain */;
+			targetProxy = 12AEEB9C2F82C0BC00B581E1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		12AEEBA52F82C0BC00B581E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SecondBrain/SecondBrain.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4Q6WN7NV5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SecondBrain/Info.plist";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrain;
+				PRODUCT_MODULE_NAME = SecondBrain;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		12AEEBA62F82C0BC00B581E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SecondBrain/SecondBrain.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4Q6WN7NV5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "SecondBrain/Info.plist";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrain;
+				PRODUCT_MODULE_NAME = SecondBrain;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
+		12AEEBA72F82C0BC00B581E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		12AEEBA82F82C0BC00B581E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		12AEEBAA2F82C0BC00B581E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrainTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SecondBrain.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SecondBrain";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		12AEEBAB2F82C0BC00B581E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrainTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SecondBrain.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SecondBrain";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
+		12AEEBAD2F82C0BC00B581E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrainUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "SecondBrain";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		12AEEBAE2F82C0BC00B581E1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P4VGX44GD8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MACOSX_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrainUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "SecondBrain";
+				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
+		19ABB285AB15F91D3327BD33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SecondBrain/SecondBrainWatch.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4Q6WN7NV5;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "WatchSupport/Info-watchOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrain.watch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		7603BCD0ADF1BC46BA9A80CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "SecondBrain/SecondBrainWatch.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4Q6WN7NV5;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "WatchSupport/Info-watchOS.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = thalesmms.secondbrain.watch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		06EBFD4ED1CC5DC73D96ECD7 /* Build configuration list for PBXNativeTarget "SecondBrainWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7603BCD0ADF1BC46BA9A80CF /* Release */,
+				19ABB285AB15F91D3327BD33 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		12AEEB7B2F82C0BB00B581E1 /* Build configuration list for PBXProject "SecondBrain" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12AEEBA72F82C0BC00B581E1 /* Debug */,
+				12AEEBA82F82C0BC00B581E1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		12AEEBA42F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrain" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12AEEBA52F82C0BC00B581E1 /* Debug */,
+				12AEEBA62F82C0BC00B581E1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		12AEEBA92F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrainTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12AEEBAA2F82C0BC00B581E1 /* Debug */,
+				12AEEBAB2F82C0BC00B581E1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		12AEEBAC2F82C0BC00B581E1 /* Build configuration list for PBXNativeTarget "SecondBrainUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12AEEBAD2F82C0BC00B581E1 /* Debug */,
+				12AEEBAE2F82C0BC00B581E1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 12AEEB782F82C0BB00B581E1 /* Project object */;
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	<key>CFBundleDisplayName</key>
+	<string>2nd Brain</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>2nd Brain uses the microphone for transient voice input while creating notes and note commands.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>2nd Brain transcribes speech on device so you can create notes and issue note commands without storing raw audio.</string>
+	<key>NSSiriUsageDescription</key>
+	<string>2nd Brain uses Siri and App Intents so you can create, edit, and read notes with your voice.</string>
+</dict>
+</plist>
