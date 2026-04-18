@@ -1,6 +1,25 @@
 # Second Brain
 
-Second Brain is a SwiftUI note-taking app for iPhone and Apple Watch with text capture, transient voice input, local note search, App Intents, and on-device Apple Intelligence flows when available.
+![Platform](https://img.shields.io/badge/platform-iOS%2026%2B%20%7C%20watchOS%2026%2B-0A84FF)
+![Xcode](https://img.shields.io/badge/Xcode-26%2B-147EFB)
+![AI](https://img.shields.io/badge/Apple%20Intelligence-on--device%20when%20available-5E5CE6)
+
+Second Brain is the private development repository for a SwiftUI second-brain and note-taking app for iPhone and Apple Watch. It combines local note capture, transient voice input, note-aware search, App Intents, CloudKit sync, and on-device Apple Intelligence flows when available.
+
+## Start Here
+
+```bash
+git clone https://github.com/ThalesMMS/Second-Brain-app.git
+cd Second-Brain-app
+open 2nd-Brain/2nd-Brain.xcodeproj
+xcodebuild -list -project 2nd-Brain/2nd-Brain.xcodeproj
+```
+
+That gets you into the app workspace quickly and confirms the checked-in project and schemes are available on your machine.
+
+## Related ThalesMMS Projects
+
+- [Second-Brain-app](https://github.com/ThalesMMS/Second-Brain-app), the public AI note-taking iOS/watchOS app repository, or browse the [ThalesMMS](https://github.com/ThalesMMS) organization.
 
 ## Features
 
