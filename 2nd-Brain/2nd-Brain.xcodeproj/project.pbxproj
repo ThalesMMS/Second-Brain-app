@@ -10,6 +10,8 @@
 		1938FCEBCE4324068E719E19 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A69ACA5B97B3928BBE762DC6 /* Foundation.framework */; };
 		38A101A4E5F02C485E0CD65E /* NotesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */; };
 		4940134C4B0533D5B818FFD3 /* QuickCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 694A3755D18BF926692B89F6 /* QuickCaptureView.swift */; };
+		5AF97F7D72A94E318C7594F0 /* QuickCaptureViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D09CA58B53427F9CF536E2 /* QuickCaptureViewModel.swift */; };
+		5F7CA842611E4C11B6C16D72 /* QuickCaptureErrorAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84389437BCA4D8595FFB9C9 /* QuickCaptureErrorAlertPresenter.swift */; };
 		8DE4FB0E415459F93A86805D /* NoteDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */; };
 		A1B2C3D42F90000100000004 /* SecondBrainDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000002 /* SecondBrainDomain */; };
 		A1B2C3D42F90000100000005 /* SecondBrainComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D42F90000100000003 /* SecondBrainComposition */; };
@@ -47,6 +49,8 @@
 		694A3755D18BF926692B89F6 /* QuickCaptureView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickCaptureView.swift; path = "SecondBrain/Features/Notes/QuickCaptureView.swift"; sourceTree = "<group>"; };
 		9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NotesListView.swift; path = "SecondBrain/Features/Notes/NotesListView.swift"; sourceTree = "<group>"; };
 		A69ACA5B97B3928BBE762DC6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		B1D09CA58B53427F9CF536E2 /* QuickCaptureViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickCaptureViewModel.swift; path = "SecondBrain/Features/Notes/QuickCaptureViewModel.swift"; sourceTree = "<group>"; };
+		D84389437BCA4D8595FFB9C9 /* QuickCaptureErrorAlertPresenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickCaptureErrorAlertPresenter.swift; path = "SecondBrain/Features/Notes/QuickCaptureErrorAlertPresenter.swift"; sourceTree = "<group>"; };
 		D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NoteDetailView.swift; path = "SecondBrain/Features/Notes/NoteDetailView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -161,6 +165,8 @@
 				D4486AB4ADB11710FC0CEF44 /* NoteDetailView.swift */,
 				9C7D1DD12518B3A3F43A7796 /* NotesListView.swift */,
 				694A3755D18BF926692B89F6 /* QuickCaptureView.swift */,
+				B1D09CA58B53427F9CF536E2 /* QuickCaptureViewModel.swift */,
+				D84389437BCA4D8595FFB9C9 /* QuickCaptureErrorAlertPresenter.swift */,
 				0140FFEDF02EEA61183EF5E7 /* SecondBrainWatchSupport.swift */,
 			);
 			name = "SecondBrainWatch Sources";
@@ -377,6 +383,8 @@
 				8DE4FB0E415459F93A86805D /* NoteDetailView.swift in Sources */,
 				38A101A4E5F02C485E0CD65E /* NotesListView.swift in Sources */,
 				4940134C4B0533D5B818FFD3 /* QuickCaptureView.swift in Sources */,
+				5AF97F7D72A94E318C7594F0 /* QuickCaptureViewModel.swift in Sources */,
+				5F7CA842611E4C11B6C16D72 /* QuickCaptureErrorAlertPresenter.swift in Sources */,
 				AF60CDCD3816537FF75EE081 /* SecondBrainWatchSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

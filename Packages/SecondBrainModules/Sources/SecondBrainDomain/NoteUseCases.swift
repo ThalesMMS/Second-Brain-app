@@ -224,6 +224,22 @@ public struct SaveNoteUseCase: Sendable {
     }
 }
 
+public struct SetNotePinnedUseCase: Sendable {
+    package let repository: any NoteRepository
+
+    public init(repository: any NoteRepository) {
+        self.repository = repository
+    }
+
+    /// Updates the pinned state for the note with the given identifier.
+    /// - Parameters:
+    ///   - noteID: The identifier of the note to update.
+    ///   - isPinned: Whether the note should be pinned.
+    public func execute(noteID: UUID, isPinned: Bool) async throws {
+        try await repository.setPinned(id: noteID, isPinned: isPinned)
+    }
+}
+
 package struct EditExistingNoteUseCase: Sendable {
     package enum Result {
         case applied(Note, message: String)

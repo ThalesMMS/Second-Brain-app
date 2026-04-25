@@ -172,7 +172,8 @@ final class SecondBrainSnapshotTests: XCTestCase {
                                 source: source,
                                 text: body
                             )
-                        ]
+                        ],
+                        isPinned: false
                     )
                 },
                 requestRecordingPermission: { true },

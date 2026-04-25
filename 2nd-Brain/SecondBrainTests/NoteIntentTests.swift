@@ -1,3 +1,4 @@
+import AppIntents
 import Testing
 import SecondBrainComposition
 import SecondBrainDomain
@@ -5,6 +6,15 @@ import SecondBrainDomain
 
 @Suite(.serialized)
 struct NoteIntentTests {
+    @Test
+    @MainActor
+    func noteFacingIntentsRequireAuthentication() {
+        #expect(CreateNoteIntent.authenticationPolicy == IntentAuthenticationPolicy.requiresAuthentication)
+        #expect(AppendToNoteIntent.authenticationPolicy == IntentAuthenticationPolicy.requiresAuthentication)
+        #expect(ReadNoteIntent.authenticationPolicy == IntentAuthenticationPolicy.requiresAuthentication)
+        #expect(AskNotesIntent.authenticationPolicy == IntentAuthenticationPolicy.requiresAuthentication)
+    }
+
     @Test
     @MainActor
     func createNoteIntentUsesInjectedGraph() async throws {

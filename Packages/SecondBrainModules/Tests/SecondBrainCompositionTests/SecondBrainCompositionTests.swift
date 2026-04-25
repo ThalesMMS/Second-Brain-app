@@ -116,6 +116,22 @@ struct SecondBrainCompositionTests {
 
     @Test
     @MainActor
+    func appGraphWiresSetNotePinnedUseCaseToSharedRepository() async throws {
+        let graph = try AppGraph(inMemory: true, enableCloudSync: false, useSharedContainer: false)
+        let created = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Keep accessible",
+            source: .manual
+        )
+
+        try await graph.setNotePinned.execute(noteID: created.id, isPinned: true)
+
+        let loaded = try await graph.loadNote.execute(id: created.id)
+        #expect(loaded?.isPinned == true)
+    }
+
+    @Test
+    @MainActor
     func makeLiveHelperSupportsDeterministicFailureInjection() async {
         await #expect(throws: StubBootstrapError.self) {
             _ = try AppGraph.makeLive(

@@ -108,6 +108,7 @@ public final class AppGraph {
     public let processVoiceCapture: ProcessVoiceCaptureUseCase
     public let appendToNote: AppendToNoteUseCase
     public let saveNote: SaveNoteUseCase
+    public let setNotePinned: SetNotePinnedUseCase
     public let deleteNote: DeleteNoteUseCase
     public let listNotes: ListNotesUseCase
     public let loadNote: LoadNoteUseCase
@@ -235,6 +236,7 @@ public final class AppGraph {
         )
         appendToNote = AppendToNoteUseCase(repository: repository)
         saveNote = SaveNoteUseCase(repository: repository)
+        setNotePinned = SetNotePinnedUseCase(repository: repository)
         deleteNote = DeleteNoteUseCase(repository: repository)
         listNotes = ListNotesUseCase(repository: repository)
         loadNote = LoadNoteUseCase(repository: repository)

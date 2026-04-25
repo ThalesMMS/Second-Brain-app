@@ -39,7 +39,7 @@ struct PersistenceControllerMigrationTests {
 
     @Test
     @MainActor
-    func migrationRemovesLegacyAudioAttachmentsAndDormantNoteColumns() async throws {
+    func migrationRemovesLegacyAudioAttachmentsAndPreservesRestoredPinnedColumn() async throws {
         let fileManager = FileManager.default
         let rootURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let storeURL = rootURL.appendingPathComponent("default.store")
@@ -103,15 +103,16 @@ struct PersistenceControllerMigrationTests {
         #expect(loadedNote?.displayTitle == "Shopping list")
         #expect(loadedNote?.body == "banana")
         #expect(loadedNote?.entries.count == 1)
+        #expect(loadedNote?.isPinned == true)
         #expect(audioAttachmentCount == 0)
-        #expect(hasPinnedColumn == false)
+        #expect(hasPinnedColumn == true)
         #expect(hasLastViewedColumn == false)
     }
 
 
     @Test
     @MainActor
-    func migrationFromV2ToV3DropsPinnedAndLastViewedColumns() async throws {
+    func migrationFromV2PreservesRestoredPinnedColumnAndDropsLastViewedColumn() async throws {
         let fileManager = FileManager.default
         let rootURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let storeURL = rootURL.appendingPathComponent("default.store")
@@ -156,8 +157,71 @@ struct PersistenceControllerMigrationTests {
         #expect(summaries.count == 1)
         #expect(loadedNote?.displayTitle == "V2 note")
         #expect(loadedNote?.body == "some body")
-        #expect(hasPinnedColumn == false)
+        #expect(loadedNote?.isPinned == true)
+        #expect(hasPinnedColumn == true)
         #expect(hasLastViewedColumn == false)
+    }
+
+    @Test
+    @MainActor
+    func migrationFromV3ToV4DefaultsAllExistingNotesPinnedFalse() async throws {
+        let fileManager = FileManager.default
+        let rootURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let storeURL = rootURL.appendingPathComponent("default.store")
+        let configuration = ModelConfiguration(url: storeURL, cloudKitDatabase: .none)
+        defer { try? fileManager.removeItem(at: rootURL) }
+
+        try PersistenceController.prepareStoreDirectory(for: configuration, fileManager: fileManager)
+
+        let firstNoteID = UUID()
+        let secondNoteID = UUID()
+        let createdAt = Date()
+        do {
+            let v3Container = try ModelContainer(
+                for: Schema(versionedSchema: SecondBrainSchemaV3.self),
+                configurations: configuration
+            )
+            let context = v3Container.mainContext
+            let firstNote = SecondBrainSchemaV3.NoteRecord(
+                id: firstNoteID,
+                title: "V3 first note",
+                bodyText: "some body",
+                searchableText: "v3 first note some body",
+                createdAt: createdAt,
+                updatedAt: createdAt
+            )
+            let secondNote = SecondBrainSchemaV3.NoteRecord(
+                id: secondNoteID,
+                title: "V3 second note",
+                bodyText: "other body",
+                searchableText: "v3 second note other body",
+                createdAt: createdAt.addingTimeInterval(1),
+                updatedAt: createdAt.addingTimeInterval(1)
+            )
+            context.insert(firstNote)
+            context.insert(secondNote)
+            try context.save()
+        }
+
+        let summaries: [NoteSummary]
+        let firstLoadedNote: Note?
+        let secondLoadedNote: Note?
+        do {
+            let migrated = try PersistenceController(configuration: configuration)
+            summaries = try await migrated.repository.listNotes(matching: nil)
+            firstLoadedNote = try await migrated.repository.loadNote(id: firstNoteID)
+            secondLoadedNote = try await migrated.repository.loadNote(id: secondNoteID)
+        }
+
+        let hasPinnedColumn = try columnExists(inSQLiteStoreAt: storeURL, table: "ZNOTERECORD", column: "ZISPINNED")
+
+        #expect(summaries.count == 2)
+        #expect(summaries.allSatisfy { $0.isPinned == false })
+        #expect(firstLoadedNote?.displayTitle == "V3 first note")
+        #expect(firstLoadedNote?.isPinned == false)
+        #expect(secondLoadedNote?.displayTitle == "V3 second note")
+        #expect(secondLoadedNote?.isPinned == false)
+        #expect(hasPinnedColumn == true)
     }
 
 }

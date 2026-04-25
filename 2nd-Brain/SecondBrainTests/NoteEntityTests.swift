@@ -96,23 +96,24 @@ struct NoteEntityTests {
 
     @Test
     @MainActor
-    func noteEntityDisplayRepresentationIncludesSubtitleWhenPreviewTextIsNonEmpty() throws {
+    func noteEntityDisplayRepresentationOmitsSubtitleWhenPreviewTextIsNonEmpty() throws {
         let entity = NoteEntity(id: UUID(), title: "Standup", previewText: "Reviewed PRs")
 
         let representation = entity.displayRepresentation
-        #expect(representation.subtitle != nil)
+        #expect(representation.subtitle == nil)
     }
 
     // MARK: - Additional edge cases
 
     @Test
     @MainActor
-    func noteEntityDisplayRepresentationTitleMatchesEntityTitle() {
+    func noteEntityDisplayRepresentationUsesOnlyTitleWhenPreviewTextIsNonEmpty() {
         let entity = NoteEntity(id: UUID(), title: "Weekly sync", previewText: "Agenda items")
 
         let representation = entity.displayRepresentation
 
         #expect(representation.title.key == "Weekly sync")
+        #expect(representation.subtitle == nil)
     }
 
     @Test

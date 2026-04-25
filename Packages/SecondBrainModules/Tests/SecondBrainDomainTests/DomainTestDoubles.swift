@@ -221,6 +221,15 @@ actor InMemoryNoteRepository: NoteRepository {
         mutateOnNextReplaceID = id
     }
 
+    func setPinned(id: UUID, isPinned: Bool) async throws {
+        guard var note = notes[id] else {
+            throw NoteRepositoryError.notFound
+        }
+
+        note.isPinned = isPinned
+        notes[id] = note
+    }
+
     /// Deletes the note with the given id from the in-memory store.
     /// If no note exists for the id, this call is a no-op.
     /// - Parameter id: The UUID of the note to remove.
@@ -275,15 +284,15 @@ actor InMemoryNoteRepository: NoteRepository {
         )
     }
 
-    /// Returns notes that match an optional search query, sorted by relevance (when a query is provided) or by recency otherwise.
+    /// Returns notes that match an optional search query, sorted by relevance (when a query is provided) or by pinned state and recency otherwise.
     /// - Parameters:
     ///   - query: Optional search string; if `nil` or empty after trimming whitespace and newlines, all notes are returned.
-    /// - Returns: An array of `Note` objects matching the query (or all notes when no query), sorted by descending relevance when a query is present; ties and the no-query result are ordered by most recently updated, then most recently created, then by lexicographically larger UUID string.
+    /// - Returns: An array of `Note` objects matching the query (or all notes when no query). Empty-query results are grouped by pinned state, then ordered by most recently updated.
     private func filteredNotes(matching query: String?) -> [Note] {
         let allNotes = notes.values
 
         guard let trimmedQuery = query?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmedQuery.isEmpty else {
-            return allNotes.sorted(by: noteSortPrecedes)
+            return allNotes.sorted(by: defaultNoteSortPrecedes)
         }
 
         return allNotes
@@ -303,17 +312,24 @@ actor InMemoryNoteRepository: NoteRepository {
                 if lhs.1 != rhs.1 {
                     return lhs.1 > rhs.1
                 }
-                return noteSortPrecedes(lhs.0, rhs.0)
+                return recencySortPrecedes(lhs.0, rhs.0)
             }
             .map(\.0)
     }
 
-    /// Determines whether the left-hand note should precede the right-hand note in the repository's sort order.
+    /// Determines whether the left-hand note should precede the right-hand note in the default repository sort order.
     /// - Parameters:
     ///   - lhs: The left-hand note to compare.
     ///   - rhs: The right-hand note to compare.
-    /// - Returns: `true` if `lhs` should come before `rhs`; notes with a later `updatedAt` come first, ties are broken by later `createdAt`, and remaining ties are broken by lexicographically greater `id.uuidString`.
-    private func noteSortPrecedes(_ lhs: Note, _ rhs: Note) -> Bool {
+    /// - Returns: `true` if `lhs` should come before `rhs`; pinned notes come first, then notes with a later `updatedAt`.
+    private func defaultNoteSortPrecedes(_ lhs: Note, _ rhs: Note) -> Bool {
+        if lhs.isPinned != rhs.isPinned {
+            return lhs.isPinned
+        }
+        return recencySortPrecedes(lhs, rhs)
+    }
+
+    private func recencySortPrecedes(_ lhs: Note, _ rhs: Note) -> Bool {
         if lhs.updatedAt != rhs.updatedAt {
             return lhs.updatedAt > rhs.updatedAt
         }
@@ -331,7 +347,8 @@ actor InMemoryNoteRepository: NoteRepository {
             id: note.id,
             title: note.displayTitle,
             previewText: NoteTextUtilities.preview(for: note.body),
-            updatedAt: note.updatedAt
+            updatedAt: note.updatedAt,
+            isPinned: note.isPinned
         )
     }
 }

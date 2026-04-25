@@ -144,6 +144,78 @@ struct SecondBrainDomainNoteUseCaseTests {
         }
     }
 
+    // MARK: - SetNotePinnedUseCase (async)
+
+    @Test
+    @MainActor
+    func setNotePinnedUseCasePinsAndUnpinsNoteWithoutChangingContent() async throws {
+        let repository = InMemoryNoteRepository()
+        let note = try await repository.createNote(
+            title: "Reference",
+            body: "Body",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+
+        try await SetNotePinnedUseCase(repository: repository).execute(noteID: note.id, isPinned: true)
+        let pinned = try #require(try await repository.loadNote(id: note.id))
+
+        #expect(pinned.isPinned == true)
+        #expect(pinned.displayTitle == "Reference")
+        #expect(pinned.body == "Body")
+        #expect(pinned.updatedAt == note.updatedAt)
+
+        try await SetNotePinnedUseCase(repository: repository).execute(noteID: note.id, isPinned: false)
+        let unpinned = try #require(try await repository.loadNote(id: note.id))
+
+        #expect(unpinned.isPinned == false)
+        #expect(unpinned.updatedAt == note.updatedAt)
+    }
+
+    @Test
+    @MainActor
+    func setNotePinnedUseCaseThrowsWhenNoteNotFound() async throws {
+        let repository = InMemoryNoteRepository()
+
+        do {
+            try await SetNotePinnedUseCase(repository: repository).execute(noteID: UUID(), isPinned: true)
+            Issue.record("Expected SetNotePinnedUseCase to throw notFound.")
+        } catch let error as NoteRepositoryError {
+            #expect(error == .notFound)
+        } catch {
+            Issue.record("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+
+    @Test
+    @MainActor
+    func listNotesUseCaseReturnsPinnedNotesBeforeUnpinnedNotes() async throws {
+        let repository = InMemoryNoteRepository()
+        let olderPinned = try await repository.createNote(
+            title: "Pinned",
+            body: "older",
+            source: .manual,
+            initialEntryKind: .creation,
+            createdAt: Date(timeIntervalSince1970: 10),
+            updatedAt: Date(timeIntervalSince1970: 10)
+        )
+        let newerUnpinned = try await repository.createNote(
+            title: "Unpinned",
+            body: "newer",
+            source: .manual,
+            initialEntryKind: .creation,
+            createdAt: Date(timeIntervalSince1970: 20),
+            updatedAt: Date(timeIntervalSince1970: 20)
+        )
+
+        try await SetNotePinnedUseCase(repository: repository).execute(noteID: olderPinned.id, isPinned: true)
+
+        let summaries = try await ListNotesUseCase(repository: repository).execute(matching: nil)
+
+        #expect(summaries.map(\.id) == [olderPinned.id, newerUnpinned.id])
+        #expect(summaries.first?.isPinned == true)
+    }
+
     // MARK: - ListNotesUseCase (async)
 
     @Test

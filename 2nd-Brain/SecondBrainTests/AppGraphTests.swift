@@ -249,6 +249,69 @@ struct AppGraphTests {
 
     @Test
     @MainActor
+    func appGraphSetNotePinnedUpdatesPinnedStateAndOrdering() async throws {
+        let graph = try makeInMemoryGraph()
+        let older = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Pinned",
+            source: .manual
+        )
+        let newer = try await graph.createNote.execute(
+            title: "Inbox",
+            body: "Unpinned",
+            source: .manual
+        )
+
+        try await graph.setNotePinned.execute(noteID: older.id, isPinned: true)
+
+        let loaded = try await graph.loadNote.execute(id: older.id)
+        let notes = try await graph.listNotes.execute(matching: nil)
+
+        #expect(loaded?.isPinned == true)
+        #expect(notes.map(\.id) == [older.id, newer.id])
+        #expect(notes.first?.isPinned == true)
+    }
+
+    @Test
+    @MainActor
+    func noteDetailViewModelTogglePinnedPreservesDraftEdits() async throws {
+        let graph = try makeInMemoryGraph()
+        let note = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Body",
+            source: .manual
+        )
+        let viewModel = NoteDetailViewModel(noteID: note.id, graph: graph)
+        await viewModel.load()
+        viewModel.draftTitle = "Unsaved title"
+        viewModel.draftBody = "Unsaved body"
+
+        await viewModel.togglePinned()
+
+        #expect(viewModel.note?.isPinned == true)
+        #expect(viewModel.isTogglingPinned == false)
+        #expect(viewModel.draftTitle == "Unsaved title")
+        #expect(viewModel.draftBody == "Unsaved body")
+    }
+
+    @Test
+    @MainActor
+    func notesStoreTogglePinnedRefreshesList() async throws {
+        let graph = try makeInMemoryGraph()
+        let older = try await graph.createNote.execute(title: "Reference", body: "Pinned", source: .manual)
+        let newer = try await graph.createNote.execute(title: "Inbox", body: "Unpinned", source: .manual)
+        let store = NotesStore(graph: graph)
+        await store.refresh()
+
+        await store.togglePinned(noteID: older.id)
+
+        #expect(store.notes.map(\.id) == [older.id, newer.id])
+        #expect(store.notes.first?.isPinned == true)
+        #expect(store.isTogglingPinned(noteID: older.id) == false)
+    }
+
+    @Test
+    @MainActor
     func appGraphLoadNoteReturnsNilForUnknownID() async throws {
         let graph = try makeInMemoryGraph()
         let unknownID = UUID()

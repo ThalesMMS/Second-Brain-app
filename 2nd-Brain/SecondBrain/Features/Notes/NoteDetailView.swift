@@ -14,6 +14,7 @@ final class NoteDetailViewModel {
     var draftBody = ""
     var isLoading = false
     var isSaving = false
+    var isTogglingPinned = false
     var errorMessage: String?
 
     init(noteID: UUID, graph: AppGraph) {
@@ -62,6 +63,27 @@ final class NoteDetailViewModel {
     func speakCurrentNote() {
         let body = draftBody.trimmingCharacters(in: .whitespacesAndNewlines)
         graph.textToSpeech.speak(body.isEmpty ? draftTitle : body, locale: .current)
+    }
+
+    /// Toggles the current note's pinned state without disturbing unsaved edits.
+    func togglePinned() async {
+        guard !isTogglingPinned, let note else {
+            return
+        }
+
+        let targetPinnedState = !note.isPinned
+        isTogglingPinned = true
+        defer { isTogglingPinned = false }
+
+        do {
+            try await graph.setNotePinned.execute(noteID: note.id, isPinned: targetPinnedState)
+            var updatedNote = note
+            updatedNote.isPinned = targetPinnedState
+            self.note = updatedNote
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     /// Stops any active text-to-speech playback.
@@ -194,6 +216,7 @@ struct NoteDetailView: View {
                 .disabled(viewModel.isSaving)
                 .accessibilityIdentifier("saveNoteButton")
 
+                pinNoteToolbarItem
                 deleteNoteToolbarItem
             }
         }
@@ -224,6 +247,32 @@ struct NoteDetailView: View {
         TextEditor(text: $viewModel.draftBody)
             .frame(minHeight: 240)
             .accessibilityIdentifier("noteBodyEditor")
+#endif
+    }
+
+    @ViewBuilder
+    private var pinNoteToolbarItem: some View {
+        let isPinned = viewModel.note?.isPinned == true
+#if os(watchOS)
+        Button {
+            Task {
+                await viewModel.togglePinned()
+            }
+        } label: {
+            Image(systemName: isPinned ? "pin.fill" : "pin")
+        }
+        .disabled(viewModel.note == nil || viewModel.isTogglingPinned || viewModel.isSaving)
+        .accessibilityIdentifier("togglePinnedButton")
+#else
+        Button {
+            Task {
+                await viewModel.togglePinned()
+            }
+        } label: {
+            Label(isPinned ? "Unpin Note" : "Pin Note", systemImage: isPinned ? "pin.fill" : "pin")
+        }
+        .disabled(viewModel.note == nil || viewModel.isTogglingPinned || viewModel.isSaving)
+        .accessibilityIdentifier("togglePinnedButton")
 #endif
     }
 

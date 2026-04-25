@@ -7,7 +7,7 @@ struct SecondBrainDomainModelSearchTests {
     // MARK: - NoteSummary / Note model
 
     @Test
-    func noteSummaryInitializerHasNoIsPinnedParameter() {
+    func noteSummaryInitializerDefaultsIsPinnedToFalse() {
         let id = UUID()
         let date = Date()
         let summary = NoteSummary(
@@ -21,10 +21,35 @@ struct SecondBrainDomainModelSearchTests {
         #expect(summary.title == "Stand-up notes")
         #expect(summary.previewText == "What I did yesterday")
         #expect(summary.updatedAt == date)
+        #expect(summary.isPinned == false)
     }
 
     @Test
-    func noteInitializerHasNoIsPinnedParameter() {
+    func noteSummaryInitializerAcceptsIsPinnedAndHashableIncludesIt() {
+        let id = UUID()
+        let date = Date()
+        let pinned = NoteSummary(
+            id: id,
+            title: "Stand-up notes",
+            previewText: "What I did yesterday",
+            updatedAt: date,
+            isPinned: true
+        )
+        let unpinned = NoteSummary(
+            id: id,
+            title: "Stand-up notes",
+            previewText: "What I did yesterday",
+            updatedAt: date,
+            isPinned: false
+        )
+
+        #expect(pinned.isPinned == true)
+        #expect(pinned != unpinned)
+        #expect(Set([pinned, unpinned]).count == 2)
+    }
+
+    @Test
+    func noteInitializerDefaultsIsPinnedToFalse() {
         let id = UUID()
         let now = Date()
         let note = Note(
@@ -40,6 +65,35 @@ struct SecondBrainDomainModelSearchTests {
         #expect(note.title == "Sprint retro")
         #expect(note.body == "What went well")
         #expect(note.entries.isEmpty)
+        #expect(note.isPinned == false)
+    }
+
+    @Test
+    func noteInitializerAcceptsIsPinnedAndHashableIncludesIt() {
+        let id = UUID()
+        let now = Date()
+        let pinned = Note(
+            id: id,
+            title: "Sprint retro",
+            body: "What went well",
+            createdAt: now,
+            updatedAt: now,
+            entries: [],
+            isPinned: true
+        )
+        let unpinned = Note(
+            id: id,
+            title: "Sprint retro",
+            body: "What went well",
+            createdAt: now,
+            updatedAt: now,
+            entries: [],
+            isPinned: false
+        )
+
+        #expect(pinned.isPinned == true)
+        #expect(pinned != unpinned)
+        #expect(Set([pinned, unpinned]).count == 2)
     }
 
     // MARK: - NoteSearchRanking
@@ -145,7 +199,7 @@ struct SecondBrainDomainModelSearchTests {
 
     @Test
     @MainActor
-    func listNotesOrdersByUpdatedAtDescendingWithoutPinPriority() async throws {
+    func listNotesOrdersUnpinnedNotesByUpdatedAtDescending() async throws {
         let repository = InMemoryNoteRepository()
         let olderDate = Date(timeIntervalSince1970: 10)
         let newerDate = Date(timeIntervalSince1970: 20)
@@ -168,7 +222,6 @@ struct SecondBrainDomainModelSearchTests {
 
         let summaries = try await repository.listNotes(matching: nil)
 
-        // The more recently updated note should appear first regardless of any other attribute
         #expect(summaries.count == 2)
         #expect(summaries.first?.id == newer.id)
         #expect(summaries.last?.id == older.id)

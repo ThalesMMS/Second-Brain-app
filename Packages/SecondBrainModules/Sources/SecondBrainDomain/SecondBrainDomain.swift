@@ -32,12 +32,14 @@ public struct NoteSummary: Identifiable, Hashable, Sendable {
     public var title: String
     public var previewText: String
     public var updatedAt: Date
+    public var isPinned: Bool
 
-    public init(id: UUID, title: String, previewText: String, updatedAt: Date) {
+    public init(id: UUID, title: String, previewText: String, updatedAt: Date, isPinned: Bool = false) {
         self.id = id
         self.title = title
         self.previewText = previewText
         self.updatedAt = updatedAt
+        self.isPinned = isPinned
     }
 
     public var displayTitle: String {
@@ -84,6 +86,7 @@ public struct Note: Identifiable, Hashable, Sendable {
     public var createdAt: Date
     public var updatedAt: Date
     public var entries: [NoteEntry]
+    public var isPinned: Bool
 
     public init(
         id: UUID,
@@ -91,7 +94,8 @@ public struct Note: Identifiable, Hashable, Sendable {
         body: String,
         createdAt: Date,
         updatedAt: Date,
-        entries: [NoteEntry]
+        entries: [NoteEntry],
+        isPinned: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -99,6 +103,7 @@ public struct Note: Identifiable, Hashable, Sendable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.entries = entries
+        self.isPinned = isPinned
     }
 
     public var displayTitle: String {
@@ -323,6 +328,7 @@ public protocol NoteRepository: AnyObject, Sendable {
         source: NoteMutationSource,
         expectedUpdatedAt: Date?
     ) async throws -> Note
+    func setPinned(id: UUID, isPinned: Bool) async throws
     func deleteNote(id: UUID) async throws
     /// Fallback free-form note resolution for assistant and voice-command flows.
     ///

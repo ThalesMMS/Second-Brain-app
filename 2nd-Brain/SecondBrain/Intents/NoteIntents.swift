@@ -48,11 +48,8 @@ struct NoteEntity: AppEntity, Hashable {
     }
 
     var displayRepresentation: DisplayRepresentation {
-        let trimmedPreview = previewText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let subtitle = trimmedPreview.isEmpty ? nil : LocalizedStringResource(stringLiteral: trimmedPreview)
         return DisplayRepresentation(
-            title: LocalizedStringResource(stringLiteral: title),
-            subtitle: subtitle
+            title: LocalizedStringResource(stringLiteral: title)
         )
     }
 }
@@ -110,6 +107,7 @@ struct NoteEntityQuery: EntityStringQuery {
 struct CreateNoteIntent: AppIntent {
     static let title: LocalizedStringResource = "Create Note"
     static let description = IntentDescription("Create a new note in Second Brain.")
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresAuthentication }
     static var openAppWhenRun = false
 
     @Parameter(title: "Title")
@@ -133,6 +131,7 @@ struct CreateNoteIntent: AppIntent {
 struct AppendToNoteIntent: AppIntent {
     static let title: LocalizedStringResource = "Append To Note"
     static let description = IntentDescription("Append text to an existing note.")
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresAuthentication }
     static var openAppWhenRun = false
 
     @Parameter(title: "Note")
@@ -165,6 +164,7 @@ struct AppendToNoteIntent: AppIntent {
 struct ReadNoteIntent: AppIntent {
     static let title: LocalizedStringResource = "Read Note"
     static let description = IntentDescription("Read the contents of a note.")
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresAuthentication }
     static var openAppWhenRun = false
 
     @Parameter(title: "Note")
@@ -187,6 +187,7 @@ struct ReadNoteIntent: AppIntent {
 struct AskNotesIntent: AppIntent {
     static let title: LocalizedStringResource = "Ask Notes"
     static let description = IntentDescription("Ask a question based on your notes.")
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresAuthentication }
     static var openAppWhenRun = false
 
     @Parameter(title: "Question")

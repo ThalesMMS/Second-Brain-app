@@ -12,6 +12,7 @@ final class NotesStore {
     var searchText = ""
     var isLoading = false
     var errorMessage: String?
+    private var togglingPinnedNoteIDs: Set<UUID> = []
     private var refreshToken = 0
 
     init(graph: AppGraph) {
@@ -43,8 +44,39 @@ final class NotesStore {
         }
     }
 
+    /// Toggles a note's pinned state and reloads the list.
+    func togglePinned(noteID: UUID) async {
+        guard !togglingPinnedNoteIDs.contains(noteID),
+              let note = notes.first(where: { $0.id == noteID }) else {
+            return
+        }
+
+        togglingPinnedNoteIDs.insert(noteID)
+        defer { togglingPinnedNoteIDs.remove(noteID) }
+
+        var token: Int?
+
+        do {
+            try await graph.setNotePinned.execute(noteID: noteID, isPinned: !note.isPinned)
+            let refreshToken = beginRefresh()
+            token = refreshToken
+            let refreshedNotes = try await graph.listNotes.execute(matching: currentQuery())
+            commitRefresh(notes: refreshedNotes, token: refreshToken)
+        } catch {
+            if let token {
+                commitRefresh(error: error, token: token)
+            } else {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
     func clearError() {
         errorMessage = nil
+    }
+
+    func isTogglingPinned(noteID: UUID) -> Bool {
+        togglingPinnedNoteIDs.contains(noteID)
     }
 
     private func beginRefresh() -> Int {
@@ -107,6 +139,16 @@ struct NotesListView: View {
                         }
                     } label: {
                         NoteSummaryRow(note: note)
+                    }
+                    .contextMenu {
+                        Button {
+                            Task {
+                                await store.togglePinned(noteID: note.id)
+                            }
+                        } label: {
+                            Label(note.isPinned ? "Unpin" : "Pin", systemImage: note.isPinned ? "pin.slash" : "pin")
+                        }
+                        .disabled(store.isTogglingPinned(noteID: note.id))
                     }
                     .accessibilityIdentifier("noteRow_\(note.id.uuidString)")
                 }
@@ -204,9 +246,18 @@ private struct NoteSummaryRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(note.title)
-                .font(.headline)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                Text(note.title)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                if note.isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("Pinned")
+                }
+            }
 
             Text(note.previewText)
                 .font(.subheadline)

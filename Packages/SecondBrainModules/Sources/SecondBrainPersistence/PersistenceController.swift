@@ -74,11 +74,11 @@ package final class PersistenceController {
 
     /// Creates a `ModelContainer` configured with the app's versioned schema and migration plan.
     /// - Parameter configuration: The `ModelConfiguration` that supplies store URL, cloud settings, and related options.
-    /// - Returns: A `ModelContainer` instance bound to `SecondBrainSchemaV3` and `SecondBrainMigrationPlan`.
+    /// - Returns: A `ModelContainer` instance bound to `SecondBrainSchemaV4` and `SecondBrainMigrationPlan`.
     /// - Throws: Any error encountered while constructing the `ModelContainer`.
     private static func makeContainer(configuration: ModelConfiguration) throws -> ModelContainer {
         try ModelContainer(
-            for: Schema(versionedSchema: SecondBrainSchemaV3.self),
+            for: Schema(versionedSchema: SecondBrainSchemaV4.self),
             migrationPlan: SecondBrainMigrationPlan.self,
             configurations: configuration
         )
@@ -211,7 +211,7 @@ package actor SwiftDataNoteRepository: NoteRepository {
     /// Lists note summaries that match an optional search query.
     /// - Parameters:
     ///   - query: An optional raw query string. If `nil` or empty after normalization, the method returns all notes.
-    /// - Returns: An array of `NoteSummary` objects. If `query` is `nil` or empty, returns all notes sorted by `updatedAt` descending; otherwise returns summaries of notes matched and ranked by relevance to the normalized query.
+    /// - Returns: An array of `NoteSummary` objects. If `query` is `nil` or empty, returns all notes grouped by pinned state then sorted by `updatedAt` descending; otherwise returns summaries of notes matched and ranked by relevance to the normalized query.
     package func listNotes(matching query: String?) async throws -> [NoteSummary] {
         let normalizedQuery = query.map(NoteTextUtilities.normalized)
         guard let normalizedQuery, !normalizedQuery.isEmpty else {
@@ -222,9 +222,9 @@ package actor SwiftDataNoteRepository: NoteRepository {
         return rankRecords(candidates, query: normalizedQuery).map(Self.makeSummary)
     }
 
-    /// Fetches summaries for the most recently updated notes, limited to the specified count.
+    /// Fetches summaries for the pinned-first recent notes, limited to the specified count.
     /// - Parameter limit: Maximum number of summaries to return. If `limit` is less than or equal to zero, an empty array is returned.
-    /// - Returns: An array of `NoteSummary` for the most recent notes, containing at most `limit` items; returns an empty array when `limit` <= 0.
+    /// - Returns: An array of `NoteSummary` grouped by pinned state then recency, containing at most `limit` items; returns an empty array when `limit` <= 0.
     package func pickerRecentNotes(limit: Int) async throws -> [NoteSummary] {
         guard limit > 0 else {
             return []
@@ -288,7 +288,8 @@ package actor SwiftDataNoteRepository: NoteRepository {
             bodyText: cleanedBody,
             searchableText: NoteTextUtilities.searchableText(title: cleanedTitle, body: cleanedBody),
             createdAt: now,
-            updatedAt: now
+            updatedAt: now,
+            isPinned: false
         )
         let entry = makeEntry(
             kind: initialEntryKind,
@@ -358,6 +359,17 @@ package actor SwiftDataNoteRepository: NoteRepository {
         note.entries.append(makeEntry(kind: .replaceBody, source: source, text: cleanedBody, createdAt: now, note: note))
         try saveIfNeeded()
         return Self.makeNote(note)
+    }
+
+    /// Updates only the pinned state of an existing note.
+    /// - Throws: `NoteRepositoryError.notFound` if no note exists with the provided `id`.
+    package func setPinned(id: UUID, isPinned: Bool) async throws {
+        guard let note = try fetchRecord(id: id) else {
+            throw NoteRepositoryError.notFound
+        }
+
+        note.isPinned = isPinned
+        try saveIfNeeded()
     }
 
     /// Deletes the note with the specified identifier if it exists.
@@ -450,8 +462,8 @@ package actor SwiftDataNoteRepository: NoteRepository {
             .map { $0 }
     }
 
-    /// Fetches all stored `NoteRecord` instances ordered by most recent `updatedAt` first.
-    /// - Returns: An array of `NoteRecord` sorted by `updatedAt` in descending order.
+    /// Fetches all stored `NoteRecord` instances ordered by pinned state, then most recent `updatedAt` first.
+    /// - Returns: An array of `NoteRecord` sorted by `isPinned` descending, then `updatedAt` descending.
     /// - Throws: If the underlying model context fetch fails.
     private func fetchAllNotes() throws -> [NoteRecord] {
         let descriptor = FetchDescriptor<NoteRecord>(
@@ -459,28 +471,33 @@ package actor SwiftDataNoteRepository: NoteRepository {
                 SortDescriptor(\.updatedAt, order: .reverse)
             ]
         )
-        return try modelContext().fetch(descriptor)
+        return try modelContext().fetch(descriptor).sorted(by: Self.noteSortPrecedes)
     }
 
-    /// Fetches up to `limit` recent `NoteRecord` values sorted by `updatedAt` descending.
+    /// Fetches up to `limit` recent `NoteRecord` values sorted by pinned state, then `updatedAt` descending.
     /// - Parameters:
-    ///   - limit: The maximum number of records to return; the fetch descriptor's `fetchLimit` is set to this value.
-    /// - Returns: An array of `NoteRecord` sorted by `updatedAt` in descending order (most recently updated first).
+    ///   - limit: The maximum number of records to return.
+    /// - Returns: An array of `NoteRecord` sorted by `isPinned` descending, then `updatedAt` descending.
     private func fetchRecentNotes(limit: Int) throws -> [NoteRecord] {
+        let descriptor = FetchDescriptor<NoteRecord>(
+            sortBy: [
+                SortDescriptor(\.updatedAt, order: .reverse)
+            ]
+        )
+        return Array(try modelContext().fetch(descriptor).sorted(by: Self.noteSortPrecedes).prefix(limit))
+    }
+
+    /// Fetches the most recently updated note record, if any.
+    /// - Returns: The most recently updated `NoteRecord`, or `nil` if no records are available.
+    /// - Throws: Any error thrown while fetching the record.
+    private func fetchMostRecentNote() throws -> NoteRecord? {
         var descriptor = FetchDescriptor<NoteRecord>(
             sortBy: [
                 SortDescriptor(\.updatedAt, order: .reverse)
             ]
         )
-        descriptor.fetchLimit = limit
-        return try modelContext().fetch(descriptor)
-    }
-
-    /// Fetches the most recently updated note record, if any.
-    /// - Returns: The most recently updated `NoteRecord`, or `nil` if no records are available.
-    /// - Throws: Any error thrown while fetching recent notes.
-    private func fetchMostRecentNote() throws -> NoteRecord? {
-        try fetchRecentNotes(limit: 1).first
+        descriptor.fetchLimit = 1
+        return try modelContext().fetch(descriptor).first
     }
 
     /// Fetches a single `NoteRecord` with the given identifier.
@@ -635,6 +652,19 @@ package actor SwiftDataNoteRepository: NoteRepository {
         return terms
     }
 
+    private static func noteSortPrecedes(_ lhs: NoteRecord, _ rhs: NoteRecord) -> Bool {
+        if lhs.isPinned != rhs.isPinned {
+            return lhs.isPinned
+        }
+        if lhs.updatedAt != rhs.updatedAt {
+            return lhs.updatedAt > rhs.updatedAt
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return lhs.createdAt > rhs.createdAt
+        }
+        return lhs.id.uuidString > rhs.id.uuidString
+    }
+
     /// Creates a `NoteSummary` representing the given `NoteRecord`.
     /// - Parameter record: The source `NoteRecord` to convert.
     /// - Returns: A `NoteSummary` containing the record's `id`, a derived `title`, a preview of the body, and `updatedAt`.
@@ -643,7 +673,8 @@ package actor SwiftDataNoteRepository: NoteRepository {
             id: record.id,
             title: NoteTextUtilities.derivedTitle(from: record.title, body: record.bodyText),
             previewText: NoteTextUtilities.preview(for: record.bodyText),
-            updatedAt: record.updatedAt
+            updatedAt: record.updatedAt,
+            isPinned: record.isPinned
         )
     }
 
@@ -660,7 +691,8 @@ package actor SwiftDataNoteRepository: NoteRepository {
             updatedAt: record.updatedAt,
             entries: record.entries
                 .sorted(by: { $0.createdAt < $1.createdAt })
-                .map(makeEntry)
+                .map(makeEntry),
+            isPinned: record.isPinned
         )
     }
 

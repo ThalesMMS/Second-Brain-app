@@ -118,7 +118,7 @@ struct PersistenceRepositoryTests {
 
     @Test
     @MainActor
-    func listNotesOrdersByUpdatedAtDescendingWithoutPinSorting() async throws {
+    func listNotesOrdersPinnedNotesFirstThenUpdatedAtDescending() async throws {
         let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
         let first = try await persistence.repository.createNote(
             title: "First note",
@@ -144,17 +144,57 @@ struct PersistenceRepositoryTests {
             to: first.id,
             source: .manual
         )
+        try await persistence.repository.setPinned(id: second.id, isPinned: true)
 
         let summaries = try await persistence.repository.listNotes(matching: nil)
 
-        // Notes must be ordered by updatedAt descending; no pin-priority grouping
         #expect(summaries.count == 2)
-        #expect(summaries.first?.id == first.id)
-        for i in 1..<summaries.count {
-            #expect(summaries[i - 1].updatedAt >= summaries[i].updatedAt)
-        }
+        #expect(summaries.map(\.id) == [second.id, first.id])
+        #expect(summaries[0].isPinned == true)
+        #expect(summaries[1].isPinned == false)
         _ = updated
-        _ = second
+    }
+
+    @Test
+    @MainActor
+    func listNotesMaintainsUpdatedAtDescendingWithinPinnedAndUnpinnedGroups() async throws {
+        let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
+        let olderPinned = try await persistence.repository.createNote(
+            title: "Pinned old",
+            body: "older pinned",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+        let newerPinned = try await persistence.repository.createNote(
+            title: "Pinned new",
+            body: "newer pinned",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+        let olderUnpinned = try await persistence.repository.createNote(
+            title: "Unpinned old",
+            body: "older unpinned",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+        let newerUnpinned = try await persistence.repository.createNote(
+            title: "Unpinned new",
+            body: "newer unpinned",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+
+        try await persistence.repository.setPinned(id: olderPinned.id, isPinned: true)
+        try await persistence.repository.setPinned(id: newerPinned.id, isPinned: true)
+
+        let summaries = try await persistence.repository.listNotes(matching: nil)
+
+        #expect(summaries.map(\.id) == [
+            newerPinned.id,
+            olderPinned.id,
+            newerUnpinned.id,
+            olderUnpinned.id,
+        ])
     }
 
     @Test
@@ -422,7 +462,7 @@ struct PersistenceRepositoryTests {
     @MainActor
     func resolveNoteReferenceWithEmptyStringReturnsMostRecentNote() async throws {
         let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
-        _ = try await persistence.repository.createNote(
+        let older = try await persistence.repository.createNote(
             title: "First",
             body: "created first",
             source: .manual,
@@ -434,6 +474,7 @@ struct PersistenceRepositoryTests {
             source: .manual,
             initialEntryKind: .creation
         )
+        try await persistence.repository.setPinned(id: older.id, isPinned: true)
 
         let resolved = try await persistence.repository.resolveNoteReference("")
 
@@ -464,7 +505,7 @@ struct PersistenceRepositoryTests {
 
     @Test
     @MainActor
-    func noteLoadedFromPersistenceHasNoIsPinnedProperty() async throws {
+    func createNoteDefaultsToUnpinnedInLoadedNoteAndSummary() async throws {
         let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
         let created = try await persistence.repository.createNote(
             title: "My note",
@@ -474,33 +515,53 @@ struct PersistenceRepositoryTests {
         )
 
         let loaded = try await persistence.repository.loadNote(id: created.id)
+        let summaries = try await persistence.repository.listNotes(matching: nil)
 
         let note = try #require(loaded)
-        // Verify the Note struct fields that remain after removing isPinned
         #expect(note.id == created.id)
         #expect(note.displayTitle == "My note")
         #expect(note.body == "Some body text")
         #expect(note.entries.count == 1)
+        #expect(note.isPinned == false)
+
+        let summary = try #require(summaries.first)
+        #expect(summary.id == created.id)
+        #expect(summary.isPinned == false)
     }
 
     @Test
     @MainActor
-    func listNotesSummaryHasNoIsPinnedData() async throws {
+    func setPinnedUpdatesOnlyPinnedFlag() async throws {
         let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
-        _ = try await persistence.repository.createNote(
-            title: "Pinless note",
+        let created = try await persistence.repository.createNote(
+            title: "Pinned note",
             body: "Body text",
             source: .manual,
             initialEntryKind: .creation
         )
+        let originalUpdatedAt = created.updatedAt
 
+        try await persistence.repository.setPinned(id: created.id, isPinned: true)
+
+        let loaded = try #require(try await persistence.repository.loadNote(id: created.id))
         let summaries = try await persistence.repository.listNotes(matching: nil)
-
         let summary = try #require(summaries.first)
-        // NoteSummary no longer carries isPinned; verify expected fields are present
-        #expect(!summary.title.isEmpty)
-        #expect(!summary.previewText.isEmpty)
-        #expect(summary.id != UUID(uuidString: "00000000-0000-0000-0000-000000000000")!)
+
+        #expect(loaded.isPinned == true)
+        #expect(summary.isPinned == true)
+        #expect(loaded.updatedAt == originalUpdatedAt)
+        #expect(loaded.displayTitle == "Pinned note")
+        #expect(loaded.body == "Body text")
+    }
+
+    @Test
+    @MainActor
+    func setPinnedThrowsWhenNoteNotFound() async throws {
+        let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
+
+        await #expect(throws: NoteRepositoryError.self) {
+            try await persistence.repository.setPinned(id: UUID(), isPinned: true)
+        }
     }
 
 }
