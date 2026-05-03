@@ -75,7 +75,7 @@ struct SeedNotesTests {
 
         let notes = try await graph.listNotes.execute(matching: nil)
         let titles = Set(notes.map(\.title))
-        let bodies = Set(notes.map(\.body))
+        let bodies = Set(notes.map(\.previewText))
         let expectedTitles: Set<String> = ["Note 0", "Note 1", "Note 2"]
         let expectedBodies: Set<String> = ["Body 0", "Body 1", "Body 2"]
         #expect(titles == expectedTitles)

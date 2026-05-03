@@ -1,7 +1,13 @@
 import Foundation
 import SecondBrainDomain
-#if os(iOS) && canImport(FoundationModels)
+#if (os(iOS) || os(macOS)) && canImport(FoundationModels)
 import FoundationModels
+import OSLog
+
+private let appleIntelligenceLogger = Logger(
+    subsystem: "SecondBrain",
+    category: "AppleIntelligence"
+)
 
 /// Maps a `SystemLanguageModel`'s availability to an `AssistantCapabilityState`.
 /// - Parameters:
@@ -11,7 +17,7 @@ import FoundationModels
 ///   - `appleIntelligenceNotEnabled` → "Apple Intelligence is turned off on this device."
 ///   - `modelNotReady` → "Apple Intelligence is still preparing its on-device model."
 ///   - unknown/unhandled reasons → "The on-device model is unavailable."
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 func appleIntelligenceCapabilityState(for model: SystemLanguageModel) -> AssistantCapabilityState {
     switch model.availability {
     case .available:
@@ -37,7 +43,7 @@ func appleIntelligenceCapabilityState(for model: SystemLanguageModel) -> Assista
 /// Map a system language model's capability into a notes assistant reduced-functionality status.
 /// - Parameter model: The `SystemLanguageModel` whose availability will be checked.
 /// - Returns: `nil` if the model is available; otherwise `.reducedFunctionality(reason: "<reason> Falling back to deterministic retrieval.")`, where `<reason>` is the human-readable unavailability message.
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 func appleIntelligenceReducedFunctionalityStatus(
     for model: SystemLanguageModel
 ) -> NotesAssistantStatus? {
@@ -49,7 +55,7 @@ func appleIntelligenceReducedFunctionalityStatus(
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 @Generable
 struct NoteCaptureRefinementPayload {
     @Guide(description: "A concise note title. Keep explicit titles when they are already good, and avoid adding facts.")
@@ -59,21 +65,21 @@ struct NoteCaptureRefinementPayload {
     let body: String
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 @Generable
 struct VoiceCaptureInterpretationPayload {
     @Guide(description: "Either newNote or assistantCommand.")
-    let intent: VoiceCaptureIntent
+    let intent: String
 
     @Guide(description: "The cleaned note content or cleaned assistant command in the same language as the transcript.")
     let normalizedText: String
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 @Generable
 struct NoteEditProposalPayload {
     @Guide(description: "One of: title, excerpt, wholeBody.")
-    let scope: NoteEditScope
+    let scope: String
 
     @Guide(description: "The full note title after the requested edit. Keep it unchanged unless the user asked to rename the note.")
     let updatedTitle: String
@@ -91,7 +97,7 @@ struct NoteEditProposalPayload {
     let clarificationQuestion: String?
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 package final class AppleIntelligenceVoiceCaptureInterpretationService: VoiceCaptureInterpretationService, @unchecked Sendable {
     private let model = SystemLanguageModel(
         useCase: .general,
@@ -158,15 +164,25 @@ package final class AppleIntelligenceVoiceCaptureInterpretationService: VoiceCap
         transcript: String
     ) -> VoiceCaptureInterpretation {
         let cleanedText = payload.normalizedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedIntent = payload.intent.trimmingCharacters(in: .whitespacesAndNewlines)
+        let intent: VoiceCaptureIntent
+        if let parsedIntent = VoiceCaptureIntent(rawValue: trimmedIntent) {
+            intent = parsedIntent
+        } else {
+            appleIntelligenceLogger.error(
+                "Unknown voice capture intent from FoundationModels payload: \(trimmedIntent, privacy: .public)"
+            )
+            intent = .unknown
+        }
 
         return VoiceCaptureInterpretation(
-            intent: payload.intent,
+            intent: intent,
             normalizedText: cleanedText.isEmpty ? transcript.trimmingCharacters(in: .whitespacesAndNewlines) : cleanedText
         )
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 package final class AppleIntelligenceNoteCaptureIntelligenceService: NoteCaptureIntelligenceService, @unchecked Sendable {
     private let model = SystemLanguageModel(
         useCase: .general,
@@ -290,7 +306,7 @@ package final class AppleIntelligenceNoteCaptureIntelligenceService: NoteCapture
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 package final class AppleIntelligenceNoteEditService: NoteEditIntelligenceService, @unchecked Sendable {
     private let model = SystemLanguageModel(
         useCase: .general,
@@ -392,18 +408,29 @@ package final class AppleIntelligenceNoteEditService: NoteEditIntelligenceServic
         let cleanedBody = payload.updatedBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? fallbackBody
             : payload.updatedBody
+        let trimmedScope = payload.scope.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parsedScope = NoteEditScope(rawValue: trimmedScope)
+        if parsedScope == nil {
+            appleIntelligenceLogger.error(
+                "Unknown note edit scope from FoundationModels payload: \(trimmedScope, privacy: .public)"
+            )
+        }
+        let cleanedScope = parsedScope ?? .clarify
         let cleanedTarget = payload.targetExcerpt
         let cleanedSummary = payload.changeSummary.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanedQuestion = payload.clarificationQuestion?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedClarificationQuestion = cleanedScope == .clarify
+            ? cleanedQuestion ?? "I could not understand the edit scope returned by Apple Intelligence. Please clarify the edit."
+            : cleanedQuestion
 
         return NoteEditProposal(
             noteID: noteID,
-            scope: payload.scope,
+            scope: cleanedScope,
             updatedTitle: cleanedTitle.isEmpty ? fallbackTitle : cleanedTitle,
             updatedBody: cleanedBody,
             targetExcerpt: cleanedTarget?.isEmpty == true ? nil : cleanedTarget,
             changeSummary: cleanedSummary.isEmpty ? "Update the note." : cleanedSummary,
-            clarificationQuestion: cleanedQuestion?.isEmpty == true ? nil : cleanedQuestion
+            clarificationQuestion: resolvedClarificationQuestion?.isEmpty == true ? nil : resolvedClarificationQuestion
         )
     }
 }

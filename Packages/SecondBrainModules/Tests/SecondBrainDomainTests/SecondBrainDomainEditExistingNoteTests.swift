@@ -200,6 +200,75 @@ struct SecondBrainDomainEditExistingNoteTests {
 
     @Test
     @MainActor
+    func editExistingNoteUseCaseClarifyScopeDoesNotApplyEdit() async throws {
+        let repository = InMemoryNoteRepository()
+        let note = try await repository.createNote(
+            title: "Scope drift",
+            body: "Original body",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+        let proposal = NoteEditProposal(
+            noteID: note.id,
+            scope: .clarify,
+            updatedTitle: "Changed title",
+            updatedBody: "Changed body",
+            targetExcerpt: nil,
+            changeSummary: "Invalid scope fallback.",
+            clarificationQuestion: "Please clarify the requested edit."
+        )
+
+        let result = try await EditExistingNoteUseCase(repository: repository).execute(
+            proposal: proposal,
+            source: .assistant
+        )
+        let loaded = try await repository.loadNote(id: note.id)
+
+        switch result {
+        case let .clarification(message):
+            #expect(message == "Please clarify the requested edit.")
+            #expect(loaded?.title == "Scope drift")
+            #expect(loaded?.body == "Original body")
+        default:
+            Issue.record("Expected clarify scope to ask for clarification without applying changes.")
+        }
+    }
+
+    @Test
+    @MainActor
+    func editExistingNoteUseCaseClarifyScopeIsNotSuppressedByNoChange() async throws {
+        let repository = InMemoryNoteRepository()
+        let note = try await repository.createNote(
+            title: "Scope drift",
+            body: "Original body",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+        let proposal = NoteEditProposal(
+            noteID: note.id,
+            scope: .clarify,
+            updatedTitle: note.displayTitle,
+            updatedBody: note.body,
+            targetExcerpt: nil,
+            changeSummary: "Invalid scope fallback.",
+            clarificationQuestion: "Please clarify the requested edit."
+        )
+
+        let result = try await EditExistingNoteUseCase(repository: repository).execute(
+            proposal: proposal,
+            source: .assistant
+        )
+
+        switch result {
+        case let .clarification(message):
+            #expect(message == "Please clarify the requested edit.")
+        default:
+            Issue.record("Expected clarify scope to ask for clarification even without content changes.")
+        }
+    }
+
+    @Test
+    @MainActor
     func editExistingNoteUseCaseResolveReturnsClarificationWhenNoteModifiedSincePending() async throws {
         let repository = InMemoryNoteRepository()
         let note = try await repository.createNote(

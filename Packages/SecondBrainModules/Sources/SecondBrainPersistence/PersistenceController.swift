@@ -49,7 +49,7 @@ package struct SeededNoteData: Sendable {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 package final class PersistenceController {
     package let container: ModelContainer
     package let repository: SwiftDataNoteRepository
@@ -199,7 +199,7 @@ package final class PersistenceController {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 package actor SwiftDataNoteRepository: NoteRepository {
     private let modelContainer: ModelContainer
     private var cachedModelContext: ModelContext?

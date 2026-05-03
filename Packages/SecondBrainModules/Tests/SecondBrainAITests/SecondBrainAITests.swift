@@ -4,6 +4,7 @@ import Testing
 @testable import SecondBrainDomain
 @testable import SecondBrainPersistence
 
+#if os(iOS) && canImport(FoundationModels)
 struct SecondBrainAITests {
     @Test
     @MainActor
@@ -443,3 +444,4 @@ private final class MockVoiceCaptureInterpretationService: VoiceCaptureInterpret
         return result
     }
 }
+#endif

@@ -1,9 +1,17 @@
 import Foundation
 import SecondBrainDomain
-#if canImport(WatchConnectivity)
+#if ENABLE_WATCH_CONNECTIVITY
 import WatchConnectivity
 
 #if os(iOS)
+private struct SendableReplyHandler: @unchecked Sendable {
+    let reply: ([String: Any]) -> Void
+
+    func callAsFunction(_ message: [String: Any]) {
+        reply(message)
+    }
+}
+
 @MainActor
 package final class CompanionRelayNotesAssistantHostCoordinator {
     private let assistantFactory: @MainActor () -> any NotesAssistantService
@@ -161,6 +169,8 @@ package final class CompanionRelayNotesAssistantHost: NSObject, WCSessionDelegat
         didReceiveMessage message: [String: Any],
         replyHandler: @escaping ([String: Any]) -> Void
     ) {
+        let replyHandler = SendableReplyHandler(reply: replyHandler)
+
         if let request = CompanionRelayMessageCodec.decodeAssistantRequest(message) {
             Task { @MainActor in
                 let result = await coordinator.process(prompt: request.prompt, conversationID: request.id)
@@ -207,4 +217,16 @@ package final class CompanionRelayNotesAssistantHost: NSObject, WCSessionDelegat
     }
 }
 #endif
+#endif
+
+#if !ENABLE_WATCH_CONNECTIVITY
+@MainActor
+package final class CompanionRelayNotesAssistantHost {
+    package init(
+        assistantFactory: @escaping @MainActor () -> any NotesAssistantService,
+        interpretationFactory: @escaping @MainActor () -> any VoiceCaptureInterpretationService
+    ) {}
+
+    package func activate() {}
+}
 #endif

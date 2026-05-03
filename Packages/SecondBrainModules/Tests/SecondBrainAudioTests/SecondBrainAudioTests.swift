@@ -109,4 +109,99 @@ struct SecondBrainAudioTests {
         #expect(url.isFileURL)
         #expect(url.pathExtension == "m4a")
     }
+
+    #if os(macOS)
+    @Test
+    @MainActor
+    func macOSRecorderPermissionAllowsUnavailableStartRecordingError() async {
+        let service = AVAudioRecorderService()
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("m4a")
+
+        let permissionGranted = await service.requestPermission()
+
+        #expect(permissionGranted == true)
+        #expect(throws: AudioServiceError.recordingUnavailable) {
+            try service.startRecording(to: url)
+        }
+    }
+
+    @Test
+    @MainActor
+    func macOSTextToSpeechStubPublishesUnavailableSignals() {
+        let service = AVSpeechTextToSpeechService()
+        let recorder = NotificationRecorder()
+        let observers = makeTTSObservers(service: service, recorder: recorder)
+        defer {
+            removeObservers(observers)
+        }
+
+        service.speak("Hello world", locale: Locale(identifier: "en_US"))
+        #expect(service.isSpeaking == true)
+
+        service.stopSpeaking()
+
+        #expect(service.isSpeaking == false)
+        #expect(recorder.didPostSpeakNotification == true)
+        #expect(recorder.speakTextLength == 11)
+        #expect(recorder.speakLocaleIdentifier == "en_US")
+        #expect(recorder.didPostStopNotification == true)
+        #expect(recorder.stopWasSpeaking == true)
+    }
+
+    @Test
+    @MainActor
+    func macOSTextToSpeechStubIgnoresEmptySpeakRequests() {
+        let service = AVSpeechTextToSpeechService()
+        let recorder = NotificationRecorder()
+        let observers = makeTTSObservers(service: service, recorder: recorder)
+        defer {
+            removeObservers(observers)
+        }
+
+        service.speak(" \n\t ", locale: Locale(identifier: "en_US"))
+
+        #expect(service.isSpeaking == false)
+        #expect(recorder.didPostSpeakNotification == false)
+    }
+    #endif
 }
+
+#if os(macOS)
+private final class NotificationRecorder: @unchecked Sendable {
+    var didPostSpeakNotification = false
+    var speakTextLength: Int?
+    var speakLocaleIdentifier: String?
+    var didPostStopNotification = false
+    var stopWasSpeaking: Bool?
+}
+
+private func makeTTSObservers(
+    service: AVSpeechTextToSpeechService,
+    recorder: NotificationRecorder
+) -> [NSObjectProtocol] {
+    let speakObserver = NotificationCenter.default.addObserver(
+        forName: AudioServiceNotifications.textToSpeechUnavailableSpeakRequested,
+        object: service,
+        queue: nil
+    ) { notification in
+        recorder.didPostSpeakNotification = true
+        recorder.speakTextLength = notification.userInfo?[AudioServiceNotifications.textLengthKey] as? Int
+        recorder.speakLocaleIdentifier = notification.userInfo?[AudioServiceNotifications.localeIdentifierKey] as? String
+    }
+    let stopObserver = NotificationCenter.default.addObserver(
+        forName: AudioServiceNotifications.textToSpeechUnavailableStopRequested,
+        object: service,
+        queue: nil
+    ) { notification in
+        recorder.didPostStopNotification = true
+        recorder.stopWasSpeaking = notification.userInfo?[AudioServiceNotifications.wasSpeakingKey] as? Bool
+    }
+    return [speakObserver, stopObserver]
+}
+
+private func removeObservers(_ observers: [NSObjectProtocol]) {
+    observers.forEach(NotificationCenter.default.removeObserver)
+}
+#endif

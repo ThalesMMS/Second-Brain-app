@@ -4,7 +4,7 @@ import SecondBrainAudio
 import SecondBrainDomain
 import SecondBrainPersistence
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public extension AppGraph {
     struct UITestConfiguration: Sendable {
         public enum Dataset: String, Sendable {
@@ -196,7 +196,7 @@ public extension AppGraph {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 private enum UITestFixtures {
     static let shoppingListID = UUID(uuidString: "00000000-0000-0000-0000-000000000101")!
     static let pendingEditCommand = "__ui_test_pending_edit__"
@@ -217,7 +217,7 @@ private enum UITestFixtures {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 private final class UITestAudioFileStore: AudioFileStore {
     private let rootURL: URL
 
@@ -245,7 +245,7 @@ private final class UITestAudioFileStore: AudioFileStore {
     func cleanupLegacyPersistedAudio() {}
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 @MainActor
 private final class UITestAudioRecordingService: AudioRecordingService {
     private let permission: AppGraph.UITestConfiguration.MicrophonePermission
@@ -302,7 +302,7 @@ private final class UITestAudioRecordingService: AudioRecordingService {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 private final class UITestSpeechTranscriptionService: SpeechTranscriptionService, Sendable {
     private let voiceScenario: AppGraph.UITestConfiguration.Voice
 
@@ -330,7 +330,7 @@ private final class UITestSpeechTranscriptionService: SpeechTranscriptionService
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 @MainActor
 private final class UITestTextToSpeechService: TextToSpeechService {
     private(set) var isSpeaking = false
@@ -349,7 +349,7 @@ private final class UITestTextToSpeechService: TextToSpeechService {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 private final class UITestNoteCaptureIntelligenceService: NoteCaptureIntelligenceService, Sendable {
     let capabilityState: AssistantCapabilityState = .available
 
@@ -370,7 +370,7 @@ private final class UITestNoteCaptureIntelligenceService: NoteCaptureIntelligenc
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 private final class UITestVoiceCaptureInterpretationService: VoiceCaptureInterpretationService, Sendable {
     private let voiceScenario: AppGraph.UITestConfiguration.Voice
 
@@ -413,7 +413,7 @@ private final class UITestVoiceCaptureInterpretationService: VoiceCaptureInterpr
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 @MainActor
 private final class UITestNotesAssistantService: NotesAssistantService {
     private struct PendingEdit {

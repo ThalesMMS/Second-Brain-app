@@ -6,11 +6,15 @@ let package = Package(
     name: "SecondBrainModules",
     platforms: [
         .iOS("26.4"),
+        .macOS("14.0"),
         .watchOS("11.0"),
     ],
     products: [
         .library(name: "SecondBrainDomain", targets: ["SecondBrainDomain"]),
         .library(name: "SecondBrainComposition", targets: ["SecondBrainComposition"]),
+        .library(name: "SecondBrainAI", targets: ["SecondBrainAI"]),
+        .library(name: "SecondBrainPersistence", targets: ["SecondBrainPersistence"]),
+        .library(name: "SecondBrainAudio", targets: ["SecondBrainAudio"]),
     ],
     targets: [
         .target(
@@ -30,7 +34,10 @@ let package = Package(
         .target(
             name: "SecondBrainAI",
             dependencies: ["SecondBrainDomain"],
-            path: "Sources/SecondBrainAI"
+            path: "Sources/SecondBrainAI",
+            swiftSettings: [
+                .define("ENABLE_WATCH_CONNECTIVITY", .when(platforms: [.iOS]))
+            ]
         ),
         .target(
             name: "SecondBrainComposition",
@@ -79,7 +86,10 @@ let package = Package(
                 "SecondBrainPersistence",
                 "SecondBrainComposition",
             ],
-            path: "Tests/SecondBrainCompositionTests"
+            path: "Tests/SecondBrainCompositionTests",
+            swiftSettings: [
+                .define("ENABLE_TESTING_PERSISTENCE_FACTORY", .when(configuration: .debug))
+            ]
         ),
     ]
 )

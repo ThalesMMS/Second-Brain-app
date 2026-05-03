@@ -1,9 +1,9 @@
 import Foundation
 import SecondBrainDomain
-#if os(iOS) && canImport(FoundationModels)
+#if (os(iOS) || os(macOS)) && canImport(FoundationModels)
 import FoundationModels
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 @MainActor
 package final class AppleIntelligenceNotesAssistant: NotesAssistantService {
     private let model: SystemLanguageModel

@@ -2,7 +2,7 @@ import Observation
 import SwiftData
 import SwiftUI
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public struct AppStartupFailure: Equatable, Sendable {
     public let title: String
     public let message: String
@@ -33,14 +33,14 @@ public struct AppStartupFailure: Equatable, Sendable {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public enum AppStartupState {
     case bootstrapping
     case ready(AppGraph)
     case failed(AppStartupFailure)
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 @MainActor
 @Observable
 public final class AppStartupCoordinator {
@@ -98,7 +98,7 @@ public final class AppStartupCoordinator {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public struct AppStartupContainerView<ReadyContent: View>: View {
     @Bindable private var coordinator: AppStartupCoordinator
     private let readyContent: (AppGraph) -> ReadyContent
@@ -134,7 +134,7 @@ public struct AppStartupContainerView<ReadyContent: View>: View {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public struct AppStartupFailureView: View {
     private let failure: AppStartupFailure
     private let onRetry: () -> Void

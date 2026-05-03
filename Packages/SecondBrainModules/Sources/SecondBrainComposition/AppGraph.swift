@@ -5,11 +5,15 @@ import SecondBrainDomain
 import SecondBrainPersistence
 import SwiftData
 
+#if canImport(WatchConnectivity)
+import WatchConnectivity
+#endif
+
 private struct UncheckedSendableBox<Value>: @unchecked Sendable {
     let value: Value
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public struct AppGraphBootstrapError: LocalizedError, Sendable {
     public let summary: String
     public let details: String
@@ -72,7 +76,7 @@ public struct AppGraphBootstrapError: LocalizedError, Sendable {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 @MainActor
 public final class AppGraph {
     struct RuntimeServices {
@@ -137,6 +141,8 @@ public final class AppGraph {
                 useSharedContainer: useSharedContainer,
                 persistenceControllerFactory: Self.makePersistenceController
             )
+        } catch let error as AppGraphBootstrapError {
+            throw error
         } catch {
             throw AppGraphBootstrapError.livePersistenceFailure(error)
         }
@@ -167,6 +173,8 @@ public final class AppGraph {
                 persistenceController: persistenceController,
                 useSharedContainer: useSharedContainer
             )
+        } catch let error as AppGraphBootstrapError {
+            throw error
         } catch {
             throw AppGraphBootstrapError.livePersistenceFailure(error)
         }
@@ -275,15 +283,26 @@ public final class AppGraph {
         useSharedContainer: Bool,
         persistenceControllerFactory: (Bool, Bool, Bool) throws -> PersistenceController
     ) throws -> AppGraph {
-        let persistenceController = try persistenceControllerFactory(
-            false,
-            enableCloudSync,
-            useSharedContainer
-        )
-        return makeLive(
-            persistenceController: persistenceController,
-            useSharedContainer: useSharedContainer
-        )
+        do {
+            let persistenceController = try persistenceControllerFactory(
+                false,
+                enableCloudSync,
+                useSharedContainer
+            )
+            return makeLive(
+                persistenceController: persistenceController,
+                useSharedContainer: useSharedContainer
+            )
+        } catch {
+            #if ENABLE_TESTING_PERSISTENCE_FACTORY
+            throw error
+            #else
+            if let error = error as? AppGraphBootstrapError {
+                throw error
+            }
+            throw AppGraphBootstrapError.livePersistenceFailure(error)
+            #endif
+        }
     }
 
     private static func makeLive(
@@ -342,8 +361,8 @@ public final class AppGraph {
             companionRelayHost: nil
         )
         #else
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, *) {
+        #if (os(iOS) || os(macOS)) && canImport(FoundationModels)
+        if #available(iOS 26.0, macOS 26.0, *) {
             let localAssistant = AppleIntelligenceNotesAssistant(repository: repository)
             return RuntimeServices(
                 audioFileStore: audioFileStore,
@@ -371,10 +390,10 @@ public final class AppGraph {
                 textToSpeech: textToSpeech,
                 notesAssistant: localAssistant,
                 noteCaptureIntelligence: UnavailableNoteCaptureIntelligenceService(
-                    reason: "AI-assisted capture requires Apple Intelligence on iOS 26 or newer."
+                    reason: Self.appleIntelligenceCaptureUnavailableReason
                 ),
                 voiceCaptureInterpretation: UnavailableVoiceCaptureInterpretationService(
-                    reason: "Voice command routing requires Apple Intelligence on iOS 26 or newer."
+                    reason: Self.appleIntelligenceVoiceRoutingUnavailableReason
                 ),
                 companionRelayHost: CompanionRelayNotesAssistantHost(
                     assistantFactory: { [repository] in
@@ -382,7 +401,7 @@ public final class AppGraph {
                     },
                     interpretationFactory: {
                         UnavailableVoiceCaptureInterpretationService(
-                            reason: "Voice command routing requires Apple Intelligence on iOS 26 or newer."
+                            reason: Self.appleIntelligenceVoiceRoutingUnavailableReason
                         )
                     }
                 )
@@ -414,5 +433,23 @@ public final class AppGraph {
         )
         #endif
         #endif
+    }
+
+    static var appleIntelligencePlatformRequirement: String {
+        #if os(macOS)
+        "macOS 26 or newer"
+        #elseif os(iOS)
+        "iOS 26 or newer"
+        #else
+        "a supported operating system"
+        #endif
+    }
+
+    static var appleIntelligenceCaptureUnavailableReason: String {
+        "AI-assisted capture requires Apple Intelligence on \(appleIntelligencePlatformRequirement)."
+    }
+
+    static var appleIntelligenceVoiceRoutingUnavailableReason: String {
+        "Voice command routing requires Apple Intelligence on \(appleIntelligencePlatformRequirement)."
     }
 }

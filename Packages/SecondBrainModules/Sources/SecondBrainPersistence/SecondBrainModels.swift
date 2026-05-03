@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 enum SecondBrainSchemaV1: VersionedSchema {
     static let versionIdentifier: Schema.Version = .init(1, 0, 0)
 
@@ -107,7 +107,7 @@ enum SecondBrainSchemaV1: VersionedSchema {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 enum SecondBrainSchemaV2: VersionedSchema {
     static let versionIdentifier: Schema.Version = .init(2, 0, 0)
 
@@ -180,7 +180,7 @@ enum SecondBrainSchemaV2: VersionedSchema {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 enum SecondBrainSchemaV3: VersionedSchema {
     static let versionIdentifier: Schema.Version = .init(3, 0, 0)
 
@@ -247,7 +247,7 @@ enum SecondBrainSchemaV3: VersionedSchema {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 enum SecondBrainSchemaV4: VersionedSchema {
     static let versionIdentifier: Schema.Version = .init(4, 0, 0)
 
@@ -317,7 +317,7 @@ enum SecondBrainSchemaV4: VersionedSchema {
     }
 }
 
-@available(iOS 17.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 enum SecondBrainMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
         [
@@ -425,5 +425,8 @@ enum SecondBrainMigrationPlan: SchemaMigrationPlan {
     }
 }
 
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 typealias NoteRecord = SecondBrainSchemaV4.NoteRecord
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 typealias NoteEntryRecord = SecondBrainSchemaV4.NoteEntryRecord

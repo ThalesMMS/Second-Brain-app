@@ -44,6 +44,7 @@ func makeTemporaryRecordingURL() -> URL {
     FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
 }
 
+@MainActor
 func makeInMemoryGraph() throws -> AppGraph {
     try AppGraph(inMemory: true, enableCloudSync: false, useSharedContainer: false)
 }

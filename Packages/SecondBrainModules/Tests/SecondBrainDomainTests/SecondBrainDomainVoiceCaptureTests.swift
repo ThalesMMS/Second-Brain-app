@@ -96,4 +96,47 @@ struct SecondBrainDomainVoiceCaptureTests {
         }
     }
 
+    @Test
+    @MainActor
+    func processVoiceCaptureUnknownIntentDoesNotCreateNote() async throws {
+        let repository = InMemoryNoteRepository()
+        let sourceURL = try makeSourceAudioFile()
+        defer { try? FileManager.default.removeItem(at: sourceURL.deletingLastPathComponent()) }
+
+        let useCase = ProcessVoiceCaptureUseCase(
+            repository: repository,
+            transcriptionService: MockSpeechTranscriptionService(result: "captured text"),
+            captureIntelligence: MockNoteCaptureIntelligenceService(
+                typedResult: NoteCaptureRefinement(title: "", body: ""),
+                transcriptResult: NoteCaptureRefinement(title: "", body: "")
+            ),
+            interpretationService: MockVoiceCaptureInterpretationService(
+                result: VoiceCaptureInterpretation(
+                    intent: .unknown,
+                    normalizedText: "captured text"
+                )
+            ),
+            assistant: MockNotesAssistantService(
+                capabilityState: .available,
+                response: NotesAssistantResponse(text: "", referencedNoteIDs: [])
+            )
+        )
+
+        let result = try await useCase.execute(
+            title: "",
+            audioURL: sourceURL,
+            locale: .current,
+            source: .speechToText
+        )
+
+        switch result {
+        case let .assistantResponse(response, transcript):
+            #expect(response.text.contains("unknown intent"))
+            #expect(transcript == "captured text")
+            #expect(try await repository.listNotes(matching: nil).isEmpty)
+        case .createdNote:
+            Issue.record("Unknown voice intent should not create a note.")
+        }
+    }
+
 }

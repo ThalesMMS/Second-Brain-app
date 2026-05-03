@@ -48,7 +48,7 @@ final class SecondBrainSnapshotTests: XCTestCase {
 
         assertSnapshot(
             of: NavigationStack {
-                NotesListView(store: store, runsTasksOnAppear: false)
+                NotesListView(store: store, runsTasksOnAppear: false, openNote: { _ in })
             }
         )
     }
@@ -60,7 +60,7 @@ final class SecondBrainSnapshotTests: XCTestCase {
 
         assertSnapshot(
             of: NavigationStack {
-                NotesListView(store: store, runsTasksOnAppear: false)
+                NotesListView(store: store, runsTasksOnAppear: false, openNote: { _ in })
             }
         )
     }

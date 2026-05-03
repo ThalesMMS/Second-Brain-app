@@ -4,6 +4,7 @@ import SecondBrainComposition
 struct ContentView: View {
     let graph: AppGraph
     @State private var notesStore: NotesStore
+    @State private var navigationPath = NavigationPath()
 
     init(graph: AppGraph) {
         self.graph = graph
@@ -11,8 +12,15 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            NotesListView(store: notesStore)
+        NavigationStack(path: $navigationPath) {
+            NotesListView(store: notesStore) { noteID in
+                navigationPath.append(noteID)
+            }
+            .navigationDestination(for: UUID.self) { noteID in
+                NoteDetailView(noteID: noteID, graph: graph) {
+                    await notesStore.refresh()
+                }
+            }
         }
     }
 }

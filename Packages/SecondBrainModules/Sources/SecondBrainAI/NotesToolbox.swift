@@ -1,6 +1,6 @@
 import Foundation
 import SecondBrainDomain
-#if os(iOS) && canImport(FoundationModels)
+#if (os(iOS) || os(macOS)) && canImport(FoundationModels)
 import FoundationModels
 
 @MainActor
@@ -224,7 +224,7 @@ package final class NotesToolbox {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct SearchNotesTool: Tool {
     let name = "searchNotes"
     let description = "Searches the user's notes and returns note ids, titles, and excerpts. Use this before reading or modifying an existing note."
@@ -249,7 +249,7 @@ struct SearchNotesTool: Tool {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct ReadNoteTool: Tool {
     let name = "readNote"
     let description = "Reads the full body of an existing note. Accepts either the note id or a short natural reference, such as the title."
@@ -274,7 +274,7 @@ struct ReadNoteTool: Tool {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct CreateNoteTool: Tool {
     let name = "createNote"
     let description = "Creates a new note with the provided title and text body."
@@ -302,7 +302,7 @@ struct CreateNoteTool: Tool {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct AppendToNoteTool: Tool {
     let name = "appendToNote"
     let description = "Appends additional text to an existing note. Provide either the note id or a natural reference like the title."
@@ -330,7 +330,7 @@ struct AppendToNoteTool: Tool {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct EditNoteTool: Tool {
     let name = "editNote"
     let description = "Edits an existing note after you have already searched and read it. Requires the exact note id returned by the note tools."
@@ -356,7 +356,7 @@ struct EditNoteTool: Tool {
     }
 }
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macOS 26.0, *)
 struct ResolvePendingEditTool: Tool {
     let name = "resolvePendingEdit"
     let description = "Confirms or cancels the currently pending note edit. Use this when the user says confirm or cancel after reviewing a proposed edit."

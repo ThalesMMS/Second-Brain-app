@@ -346,6 +346,40 @@ struct PersistenceRepositoryTests {
         }
     }
 
+    @Test
+    @MainActor
+    func replaceNoteThrowsConflictWhenExpectedUpdatedAtDoesNotMatch() async throws {
+        let persistence = try PersistenceController(inMemory: true, enableCloudSync: false)
+        let original = try await persistence.repository.createNote(
+            title: "Title",
+            body: "Body",
+            source: .manual,
+            initialEntryKind: .creation
+        )
+
+        let staleExpectedUpdatedAt = original.updatedAt.addingTimeInterval(-5)
+
+        do {
+            _ = try await persistence.repository.replaceNote(
+                id: original.id,
+                title: "Updated title",
+                body: "Updated body",
+                source: .manual,
+                expectedUpdatedAt: staleExpectedUpdatedAt
+            )
+            Issue.record("Expected replaceNote with staleExpectedUpdatedAt to throw NoteRepositoryError.conflict.")
+        } catch let error as NoteRepositoryError {
+            switch error {
+            case .conflict:
+                break
+            default:
+                Issue.record("Expected NoteRepositoryError.conflict, got \(error).")
+            }
+        } catch {
+            Issue.record("Expected NoteRepositoryError.conflict, got \(error).")
+        }
+    }
+
     // MARK: - deleteNote (async, actor)
 
     @Test

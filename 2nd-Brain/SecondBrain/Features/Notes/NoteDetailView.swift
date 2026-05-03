@@ -2,6 +2,11 @@ import SwiftUI
 import Observation
 import SecondBrainComposition
 import SecondBrainDomain
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 @MainActor
 @Observable
@@ -9,13 +14,82 @@ final class NoteDetailViewModel {
     let noteID: UUID
     private let graph: AppGraph
 
-    var note: Note?
+    enum ViewState: Equatable {
+        case idle
+        case loading
+        case loaded(Note)
+        case conflict(message: String, note: Note?)
+        case error(message: String, note: Note?)
+
+        var isLoading: Bool {
+            if case .loading = self { return true }
+            return false
+        }
+
+        var note: Note? {
+            switch self {
+            case .loaded(let note):
+                return note
+            case .conflict(_, let note), .error(_, let note):
+                return note
+            case .idle, .loading:
+                return nil
+            }
+        }
+
+        var errorMessage: String? {
+            get {
+                if case .error(let message, _) = self { return message }
+                return nil
+            }
+            set {
+                if let newValue {
+                    self = .error(message: newValue, note: note)
+                } else if case .error = self {
+                    self = note.map { .loaded($0) } ?? .idle
+                }
+            }
+        }
+
+        var conflictMessage: String? {
+            if case .conflict(let message, _) = self { return message }
+            return nil
+        }
+    }
+
+    var state: ViewState = .idle
+
+    var note: Note? {
+        get { state.note }
+        set {
+            if let newValue {
+                state = .loaded(newValue)
+            } else {
+                if state.isLoading { return }
+                state = .idle
+            }
+        }
+    }
+
     var draftTitle = ""
     var draftBody = ""
-    var isLoading = false
     var isSaving = false
     var isTogglingPinned = false
-    var errorMessage: String?
+
+    var isLoading: Bool { state.isLoading }
+    var errorMessage: String? {
+        get { state.errorMessage }
+        set { state.errorMessage = newValue }
+    }
+    var conflictMessage: String? { state.conflictMessage }
+    var hasUnsavedChanges: Bool {
+        draftTitle != lastAutosavedTitle || draftBody != lastAutosavedBody
+    }
+
+    private var autosaveTask: Task<Void, Never>?
+    private var lastAutosavedTitle = ""
+    private var lastAutosavedBody = ""
+    private var lastSeenUpdatedAt: Date?
 
     init(noteID: UUID, graph: AppGraph) {
         self.noteID = noteID
@@ -23,22 +97,45 @@ final class NoteDetailViewModel {
     }
 
     /// Loads the note and refreshes the editable draft state.
-    func load() async {
-        isLoading = true
-        defer { isLoading = false }
+    func load(preservingUnsavedDrafts: Bool = true) async {
+        let currentNote = note
+        let shouldPreserveDrafts = preservingUnsavedDrafts && hasUnsavedChanges
+        state = .loading
 
         do {
-            note = try await graph.loadNote.execute(id: noteID)
-            draftTitle = note?.title ?? ""
-            draftBody = note?.body ?? ""
-            errorMessage = nil
+            let loaded = try await graph.loadNote.execute(id: noteID)
+            guard let loaded else {
+                state = .error(message: "The selected note could not be loaded.", note: currentNote)
+                return
+            }
+
+            state = .loaded(loaded)
+            lastSeenUpdatedAt = loaded.updatedAt
+            if !shouldPreserveDrafts {
+                draftTitle = loaded.title
+                draftBody = loaded.body
+                lastAutosavedTitle = loaded.title
+                lastAutosavedBody = loaded.body
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            state = .error(message: error.localizedDescription, note: currentNote)
         }
     }
 
     /// Saves the current draft back to the loaded note.
     func save() async {
+        await saveImpl(reason: "manual")
+    }
+
+    func retryAfterError() async {
+        if hasUnsavedChanges, note != nil {
+            await save()
+        } else {
+            await load()
+        }
+    }
+
+    private func saveImpl(reason: String) async {
         guard let note else {
             return
         }
@@ -47,17 +144,57 @@ final class NoteDetailViewModel {
         defer { isSaving = false }
 
         do {
-            self.note = try await graph.saveNote.execute(
+            let saved = try await graph.saveNote.execute(
                 noteID: note.id,
                 title: draftTitle,
                 body: draftBody,
-                lastSeenUpdatedAt: note.updatedAt,
+                lastSeenUpdatedAt: lastSeenUpdatedAt ?? note.updatedAt,
                 source: .manual
             )
-            errorMessage = nil
+            self.note = saved
+            lastAutosavedTitle = draftTitle
+            lastAutosavedBody = draftBody
+            lastSeenUpdatedAt = saved.updatedAt
+        } catch let repoError as NoteRepositoryError {
+            switch repoError {
+            case .conflict:
+                state = .conflict(
+                    message: "This note was changed elsewhere. Reload the latest version or keep editing and try saving again.",
+                    note: note
+                )
+            default:
+                state = .error(message: repoError.localizedDescription, note: note)
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            state = .error(message: error.localizedDescription, note: note)
         }
+    }
+
+    func scheduleAutosave() {
+        autosaveTask?.cancel()
+        autosaveTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 800_000_000)
+            } catch {
+                return
+            }
+            guard let self else { return }
+            await self.autosaveIfNeeded()
+        }
+    }
+
+    func autosaveIfNeeded() async {
+        guard !isSaving else { return }
+        guard note != nil else { return }
+
+        guard hasUnsavedChanges else { return }
+
+        await saveImpl(reason: "autosave")
+    }
+
+    func cancelAutosave() {
+        autosaveTask?.cancel()
+        autosaveTask = nil
     }
 
     func speakCurrentNote() {
@@ -98,7 +235,15 @@ final class NoteDetailViewModel {
 
     /// Clears the current error message.
     func clearError() {
-        errorMessage = nil
+        if case .error = state {
+            state = note.map { .loaded($0) } ?? .idle
+        }
+    }
+
+    func clearConflict() {
+        if case .conflict = state {
+            state = note.map { .loaded($0) } ?? .idle
+        }
     }
 }
 
@@ -138,6 +283,9 @@ struct NoteDetailView: View {
                     TextField("Title", text: $viewModel.draftTitle)
                         .textInputAutocapitalization(.sentences)
                         .accessibilityIdentifier("noteTitleField")
+                        .onChange(of: viewModel.draftTitle) { _, _ in
+                            viewModel.scheduleAutosave()
+                        }
 
                     noteBodyEditor
                 }
@@ -192,6 +340,12 @@ struct NoteDetailView: View {
 
             await viewModel.load()
         }
+        .onDisappear {
+            Task {
+                await viewModel.autosaveIfNeeded()
+                viewModel.cancelAutosave()
+            }
+        }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
@@ -227,12 +381,55 @@ struct NoteDetailView: View {
                 set: { newValue in if !newValue { viewModel.clearError() } }
             ),
             actions: {
+                Button("Retry") {
+                    Task { await viewModel.retryAfterError() }
+                }
+
+                if viewModel.note != nil {
+                    Button("Copy Draft") {
+                        #if os(iOS)
+                        UIPasteboard.general.string = [viewModel.draftTitle, viewModel.draftBody]
+                            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                            .joined(separator: "\n\n")
+                        #elseif os(macOS)
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(
+                            [viewModel.draftTitle, viewModel.draftBody]
+                                .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                                .joined(separator: "\n\n"),
+                            forType: .string
+                        )
+                        #endif
+                    }
+                }
+
                 Button("OK", role: .cancel) {
                     viewModel.clearError()
                 }
             },
             message: {
                 Text(viewModel.errorMessage ?? "")
+            }
+        )
+        .alert(
+            "Note changed",
+            isPresented: Binding(
+                get: { viewModel.conflictMessage != nil },
+                set: { newValue in if !newValue { viewModel.clearConflict() } }
+            ),
+            actions: {
+                Button("Reload latest") {
+                    Task {
+                        await viewModel.load(preservingUnsavedDrafts: false)
+                        viewModel.clearConflict()
+                    }
+                }
+                Button("Keep editing", role: .cancel) {
+                    viewModel.clearConflict()
+                }
+            },
+            message: {
+                Text(viewModel.conflictMessage ?? "")
             }
         )
     }
@@ -243,10 +440,16 @@ struct NoteDetailView: View {
         TextField("Body", text: $viewModel.draftBody, axis: .vertical)
             .lineLimit(4...10)
             .accessibilityIdentifier("noteBodyEditor")
+            .onChange(of: viewModel.draftBody) { _, _ in
+                viewModel.scheduleAutosave()
+            }
 #else
         TextEditor(text: $viewModel.draftBody)
             .frame(minHeight: 240)
             .accessibilityIdentifier("noteBodyEditor")
+            .onChange(of: viewModel.draftBody) { _, _ in
+                viewModel.scheduleAutosave()
+            }
 #endif
     }
 

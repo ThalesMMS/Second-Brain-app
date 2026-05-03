@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import SecondBrainComposition
+@testable import SecondBrainDomain
 @testable import SecondBrainPersistence
 
 struct SecondBrainCompositionTests {
@@ -114,6 +115,15 @@ struct SecondBrainCompositionTests {
         #expect(loaded?.body == "Recover startup")
     }
 
+    #if os(macOS)
+    @Test
+    @MainActor
+    func appleIntelligenceFallbackReasonsMentionMacOS() {
+        #expect(AppGraph.appleIntelligenceCaptureUnavailableReason.contains("macOS 26 or newer"))
+        #expect(AppGraph.appleIntelligenceVoiceRoutingUnavailableReason.contains("macOS 26 or newer"))
+    }
+    #endif
+
     @Test
     @MainActor
     func appGraphWiresSetNotePinnedUseCaseToSharedRepository() async throws {
@@ -133,7 +143,7 @@ struct SecondBrainCompositionTests {
     @Test
     @MainActor
     func makeLiveHelperSupportsDeterministicFailureInjection() async {
-        await #expect(throws: StubBootstrapError.self) {
+        await #expect(throws: AppGraphBootstrapError.self) {
             _ = try AppGraph.makeLive(
                 enableCloudSync: false,
                 useSharedContainer: false,
@@ -401,6 +411,31 @@ struct SecondBrainCompositionTests {
 
         #expect(caughtError?.summary == "Second Brain couldn't open your notes store.")
         #expect(caughtError?.details.contains("disk failure") == true)
+    }
+
+    @Test
+    @MainActor
+    func makeLiveHelperRethrowsExistingBootstrapError() {
+        let bootstrapError = AppGraphBootstrapError(
+            summary: "Existing bootstrap summary.",
+            details: "Existing bootstrap diagnostics."
+        )
+        var caughtError: AppGraphBootstrapError?
+
+        do {
+            _ = try AppGraph.makeLive(
+                enableCloudSync: false,
+                useSharedContainer: false,
+                persistenceControllerFactory: { _, _, _ in
+                    throw bootstrapError
+                }
+            )
+        } catch let error as AppGraphBootstrapError {
+            caughtError = error
+        } catch {}
+
+        #expect(caughtError?.summary == bootstrapError.summary)
+        #expect(caughtError?.details == bootstrapError.details)
     }
 }
 

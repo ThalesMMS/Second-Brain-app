@@ -1,7 +1,25 @@
 import Foundation
 import AVFAudio
 import AVFoundation
+import OSLog
 import SecondBrainDomain
+
+private let audioServicesLogger = Logger(
+    subsystem: "SecondBrain",
+    category: "AudioServices"
+)
+
+package enum AudioServiceNotifications {
+    package static let textToSpeechUnavailableSpeakRequested = Notification.Name(
+        "SecondBrainAudioTextToSpeechUnavailableSpeakRequested"
+    )
+    package static let textToSpeechUnavailableStopRequested = Notification.Name(
+        "SecondBrainAudioTextToSpeechUnavailableStopRequested"
+    )
+    package static let textLengthKey = "textLength"
+    package static let localeIdentifierKey = "localeIdentifier"
+    package static let wasSpeakingKey = "wasSpeaking"
+}
 
 package final class AppGroupAudioFileStore: AudioFileStore {
     private let fileManager = FileManager.default
@@ -45,6 +63,7 @@ package final class AppGroupAudioFileStore: AudioFileStore {
     }
 }
 
+#if !os(macOS)
 @MainActor
 package final class AVAudioRecorderService: NSObject, AudioRecordingService {
     private var recorder: AVAudioRecorder?
@@ -141,6 +160,28 @@ package final class AVAudioRecorderService: NSObject, AudioRecordingService {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }
+#else
+@MainActor
+package final class AVAudioRecorderService: NSObject, AudioRecordingService {
+    package override init() {
+        super.init()
+    }
+
+    package var isRecording: Bool { false }
+
+    package func requestPermission() async -> Bool { true }
+
+    package func startRecording(to url: URL) throws {
+        throw AudioServiceError.recordingUnavailable
+    }
+
+    package func stopRecording() throws -> RecordedAudio {
+        throw AudioServiceError.recordingUnavailable
+    }
+
+    package func cancelRecording() {}
+}
+#endif
 
 #if canImport(Speech)
 import Speech
@@ -153,7 +194,7 @@ final class SpeechAnalyzerFileTranscriptionService: SpeechTranscriptionService, 
     /// - Returns: The transcription text with leading and trailing whitespace and newlines removed.
     /// - Throws: `AudioServiceError.transcriptionUnavailable` if speech transcription is not supported on the current OS version.
     func transcribeFile(at url: URL, locale: Locale) async throws -> String {
-        guard #available(iOS 26.0, *) else {
+        guard #available(iOS 26.0, macOS 26.0, *) else {
             throw AudioServiceError.transcriptionUnavailable
         }
 
@@ -176,7 +217,7 @@ final class SpeechAnalyzerFileTranscriptionService: SpeechTranscriptionService, 
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    @available(iOS 26.0, *)
+    @available(iOS 26.0, macOS 26.0, *)
     private func ensureModel(for transcriber: SpeechTranscriber, locale: Locale) async throws {
         let supported = await SpeechTranscriber.supportedLocales
             .map(\.identifier)
@@ -222,6 +263,7 @@ package enum SpeechTranscriptionServiceFactory {
     }
 }
 
+#if !os(macOS)
 @MainActor
 package final class AVSpeechTextToSpeechService: NSObject, TextToSpeechService, AVSpeechSynthesizerDelegate {
     private let synthesizer = AVSpeechSynthesizer()
@@ -262,3 +304,48 @@ package final class AVSpeechTextToSpeechService: NSObject, TextToSpeechService, 
         synthesizer.stopSpeaking(at: .immediate)
     }
 }
+#else
+@MainActor
+package final class AVSpeechTextToSpeechService: NSObject, TextToSpeechService {
+    private var attemptedUnavailableSpeech = false
+
+    package override init() {
+        super.init()
+    }
+
+    package var isSpeaking: Bool { attemptedUnavailableSpeech }
+
+    package func speak(_ text: String, locale: Locale?) {
+        let cleanedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedText.isEmpty else {
+            return
+        }
+
+        attemptedUnavailableSpeech = true
+        audioServicesLogger.info(
+            "Text-to-speech requested on a platform where AVSpeechTextToSpeechService is unavailable. textLength=\(cleanedText.count, privacy: .public), locale=\(locale?.identifier ?? "nil", privacy: .public)"
+        )
+        NotificationCenter.default.post(
+            name: AudioServiceNotifications.textToSpeechUnavailableSpeakRequested,
+            object: self,
+            userInfo: [
+                AudioServiceNotifications.textLengthKey: cleanedText.count,
+                AudioServiceNotifications.localeIdentifierKey: locale?.identifier ?? "",
+            ]
+        )
+    }
+
+    package func stopSpeaking() {
+        let wasSpeaking = attemptedUnavailableSpeech
+        attemptedUnavailableSpeech = false
+        audioServicesLogger.info(
+            "Text-to-speech stop requested on a platform where AVSpeechTextToSpeechService is unavailable. wasSpeaking=\(wasSpeaking, privacy: .public)"
+        )
+        NotificationCenter.default.post(
+            name: AudioServiceNotifications.textToSpeechUnavailableStopRequested,
+            object: self,
+            userInfo: [AudioServiceNotifications.wasSpeakingKey: wasSpeaking]
+        )
+    }
+}
+#endif

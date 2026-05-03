@@ -1,7 +1,4 @@
 import Foundation
-#if os(iOS) && canImport(FoundationModels)
-import FoundationModels
-#endif
 
 package enum SecondBrainSettings {
     package nonisolated static let appGroupIdentifier = "group.thalesmms.secondbrain"
@@ -146,12 +143,10 @@ public struct NoteCaptureRefinement: Hashable, Sendable {
     }
 }
 
-#if os(iOS) && canImport(FoundationModels)
-@Generable
-#endif
 public enum VoiceCaptureIntent: String, Codable, CaseIterable, Hashable, Sendable {
     case newNote
     case assistantCommand
+    case unknown
 }
 
 public struct VoiceCaptureInterpretation: Hashable, Sendable {
@@ -169,13 +164,11 @@ public enum VoiceCaptureResult: Hashable, Sendable {
     case assistantResponse(NotesAssistantResponse, transcript: String)
 }
 
-#if os(iOS) && canImport(FoundationModels)
-@Generable
-#endif
 package enum NoteEditScope: String, Codable, CaseIterable, Sendable {
     case title
     case excerpt
     case wholeBody
+    case clarify
 }
 
 package struct NoteEditProposal: Hashable, Sendable {

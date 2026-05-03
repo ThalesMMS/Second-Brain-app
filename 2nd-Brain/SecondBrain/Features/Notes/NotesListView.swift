@@ -12,6 +12,20 @@ final class NotesStore {
     var searchText = ""
     var isLoading = false
     var errorMessage: String?
+    private var lastOperation: LastOperation?
+
+    struct CreateNotePayload: Equatable {
+        let title: String
+        let body: String
+        let source: NoteMutationSource
+    }
+
+    enum LastOperation {
+        case refresh
+        case create(payload: CreateNotePayload)
+        case delete(noteID: UUID)
+        case togglePinned(noteID: UUID)
+    }
     private var togglingPinnedNoteIDs: Set<UUID> = []
     private var refreshToken = 0
 
@@ -21,6 +35,7 @@ final class NotesStore {
 
     /// Reloads notes for the current search text.
     func refresh() async {
+        lastOperation = .refresh
         let token = beginRefresh()
 
         do {
@@ -31,8 +46,30 @@ final class NotesStore {
         }
     }
 
+    /// Creates a note and reloads the list.
+    func createNote(payload: CreateNotePayload) async -> Note? {
+        lastOperation = .create(payload: payload)
+        let token = beginRefresh()
+
+        do {
+            let note = try await graph.createNote.execute(
+                title: payload.title,
+                body: payload.body,
+                source: payload.source
+            )
+            lastOperation = .refresh
+            let refreshedNotes = try await graph.listNotes.execute(matching: currentQuery())
+            commitRefresh(notes: refreshedNotes, token: token)
+            return note
+        } catch {
+            commitRefresh(error: error, token: token)
+            return nil
+        }
+    }
+
     /// Deletes a note and reloads the list.
     func delete(noteID: UUID) async {
+        lastOperation = .delete(noteID: noteID)
         let token = beginRefresh()
 
         do {
@@ -51,6 +88,7 @@ final class NotesStore {
             return
         }
 
+        lastOperation = .togglePinned(noteID: noteID)
         togglingPinnedNoteIDs.insert(noteID)
         defer { togglingPinnedNoteIDs.remove(noteID) }
 
@@ -73,6 +111,26 @@ final class NotesStore {
 
     func clearError() {
         errorMessage = nil
+    }
+
+    func retryLastOperation() async {
+        guard errorMessage != nil else {
+            return
+        }
+
+        let operation = lastOperation
+        errorMessage = nil
+
+        switch operation {
+        case .refresh, .none:
+            await refresh()
+        case .create(let payload):
+            _ = await createNote(payload: payload)
+        case .delete(let noteID):
+            await delete(noteID: noteID)
+        case .togglePinned(let noteID):
+            await togglePinned(noteID: noteID)
+        }
     }
 
     func isTogglingPinned(noteID: UUID) -> Bool {
@@ -113,13 +171,15 @@ final class NotesStore {
 struct NotesListView: View {
     @Bindable var store: NotesStore
     let runsTasksOnAppear: Bool
+    let openNote: (UUID) -> Void
 
     @State private var showingQuickCapture = false
     @State private var showingAssistant = false
 
-    init(store: NotesStore, runsTasksOnAppear: Bool = true) {
+    init(store: NotesStore, runsTasksOnAppear: Bool = true, openNote: @escaping (UUID) -> Void) {
         self.store = store
         self.runsTasksOnAppear = runsTasksOnAppear
+        self.openNote = openNote
     }
 
     var body: some View {
@@ -133,13 +193,14 @@ struct NotesListView: View {
                 .listRowSeparatorIfAvailable()
             } else {
                 ForEach(store.notes) { note in
-                    NavigationLink {
-                        NoteDetailView(noteID: note.id, graph: store.graph) {
-                            await store.refresh()
-                        }
+                    let noteRowIdentifier = "noteRow_\(note.id.uuidString)"
+
+                    Button {
+                        openNote(note.id)
                     } label: {
                         NoteSummaryRow(note: note)
                     }
+                    .buttonStyle(.plain)
                     .contextMenu {
                         Button {
                             Task {
@@ -150,7 +211,7 @@ struct NotesListView: View {
                         }
                         .disabled(store.isTogglingPinned(noteID: note.id))
                     }
-                    .accessibilityIdentifier("noteRow_\(note.id.uuidString)")
+                    .accessibilityIdentifier(noteRowIdentifier)
                 }
                 .onDelete { offsets in
                     let ids = offsets.compactMap { index in
@@ -190,6 +251,15 @@ struct NotesListView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
+                    Task {
+                        await createNewNote()
+                    }
+                } label: {
+                    Label("New Note", systemImage: "plus")
+                }
+                .accessibilityIdentifier("newNoteButton")
+
+                Button {
                     showingAssistant = true
                 } label: {
                     Label("Ask Notes", systemImage: "sparkles")
@@ -219,6 +289,12 @@ struct NotesListView: View {
                 set: { newValue in if !newValue { store.clearError() } }
             ),
             actions: {
+                Button("Retry") {
+                    Task {
+                        await store.retryLastOperation()
+                    }
+                }
+
                 Button("OK", role: .cancel) {
                     store.clearError()
                 }
@@ -227,6 +303,18 @@ struct NotesListView: View {
                 Text(store.errorMessage ?? "")
             }
         )
+    }
+
+    private func createNewNote() async {
+        let payload = NotesStore.CreateNotePayload(
+            title: "Untitled note",
+            body: "",
+            source: .manual
+        )
+
+        if let note = await store.createNote(payload: payload) {
+            openNote(note.id)
+        }
     }
 }
 

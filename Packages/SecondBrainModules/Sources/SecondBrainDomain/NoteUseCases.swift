@@ -96,6 +96,13 @@ public struct ProcessVoiceCaptureUseCase: Sendable {
                     )
                 }
             }
+        case .unknown:
+            return .assistantResponse(
+                makeUnavailableAssistantResponse(
+                    reason: "Voice command routing returned an unknown intent. Please try again."
+                ),
+                transcript: cleanedTranscript
+            )
         }
     }
 
@@ -360,14 +367,13 @@ package struct EditExistingNoteUseCase: Sendable {
         let titleChanged = resolvedUpdatedTitle != note.displayTitle
         let bodyChanged = normalizedUpdatedBody != normalizedCurrentBody
 
-        guard titleChanged || bodyChanged else {
-            return .noChange("That edit would not change note \(note.displayTitle).")
-        }
-
         switch proposal.scope {
         case .title:
             if bodyChanged {
                 return makePendingResult(proposal: proposal, note: note, allowPending: allowPending)
+            }
+            guard titleChanged else {
+                return .noChange("That edit would not change note \(note.displayTitle).")
             }
 
             return try await applyProposal(
@@ -425,7 +431,15 @@ package struct EditExistingNoteUseCase: Sendable {
                 source: source
             )
         case .wholeBody:
+            guard titleChanged || bodyChanged else {
+                return .noChange("That edit would not change note \(note.displayTitle).")
+            }
             return makePendingResult(proposal: proposal, note: note, allowPending: allowPending)
+        case .clarify:
+            return .clarification(
+                proposal.clarificationQuestion
+                ?? "I could not understand the edit scope for note \(note.displayTitle). Please clarify the edit."
+            )
         }
     }
 

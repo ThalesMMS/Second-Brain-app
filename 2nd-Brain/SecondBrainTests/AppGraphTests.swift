@@ -296,6 +296,111 @@ struct AppGraphTests {
 
     @Test
     @MainActor
+    func noteDetailViewModelConflictPreservesLoadedNote() async throws {
+        let graph = try makeInMemoryGraph()
+        let note = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Body",
+            source: .manual
+        )
+        let viewModel = NoteDetailViewModel(noteID: note.id, graph: graph)
+        await viewModel.load()
+        _ = try await graph.repository.replaceNote(
+            id: note.id,
+            title: "Remote title",
+            body: "Remote body",
+            source: .manual,
+            expectedUpdatedAt: note.updatedAt
+        )
+        viewModel.draftTitle = "Local title"
+
+        await viewModel.save()
+
+        #expect(viewModel.conflictMessage != nil)
+        #expect(viewModel.note?.id == note.id)
+        #expect(viewModel.draftTitle == "Local title")
+    }
+
+    @Test
+    @MainActor
+    func noteDetailViewModelLoadPreservesDirtyDraft() async throws {
+        let graph = try makeInMemoryGraph()
+        let note = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Body",
+            source: .manual
+        )
+        let viewModel = NoteDetailViewModel(noteID: note.id, graph: graph)
+        await viewModel.load()
+        viewModel.draftTitle = "Local title"
+        viewModel.draftBody = "Local body"
+
+        _ = try await graph.repository.replaceNote(
+            id: note.id,
+            title: "Remote title",
+            body: "Remote body",
+            source: .manual,
+            expectedUpdatedAt: note.updatedAt
+        )
+        await viewModel.load()
+
+        #expect(viewModel.note?.title == "Remote title")
+        #expect(viewModel.draftTitle == "Local title")
+        #expect(viewModel.draftBody == "Local body")
+
+        await viewModel.save()
+        let saved = try await graph.loadNote.execute(id: note.id)
+
+        #expect(viewModel.conflictMessage == nil)
+        #expect(saved?.title == "Local title")
+        #expect(saved?.body == "Local body")
+    }
+
+    @Test
+    @MainActor
+    func noteDetailViewModelCancelAutosavePreventsPendingSave() async throws {
+        let graph = try makeInMemoryGraph()
+        let note = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Body",
+            source: .manual
+        )
+        let viewModel = NoteDetailViewModel(noteID: note.id, graph: graph)
+        await viewModel.load()
+        viewModel.draftTitle = "Unsaved title"
+
+        viewModel.scheduleAutosave()
+        viewModel.cancelAutosave()
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+
+        let loaded = try await graph.loadNote.execute(id: note.id)
+        #expect(loaded?.title == "Reference")
+    }
+
+    @Test
+    @MainActor
+    func noteDetailViewModelErrorRetrySavesDirtyDraft() async throws {
+        let graph = try makeInMemoryGraph()
+        let note = try await graph.createNote.execute(
+            title: "Reference",
+            body: "Body",
+            source: .manual
+        )
+        let viewModel = NoteDetailViewModel(noteID: note.id, graph: graph)
+        await viewModel.load()
+        viewModel.draftTitle = "Local title"
+        viewModel.errorMessage = "Temporary save failure"
+
+        await viewModel.retryAfterError()
+
+        let loaded = try await graph.loadNote.execute(id: note.id)
+        #expect(loaded?.title == "Local title")
+        #expect(viewModel.errorMessage == nil)
+        #expect(viewModel.draftTitle == "Local title")
+    }
+
+    @Test
+    @MainActor
     func notesStoreTogglePinnedRefreshesList() async throws {
         let graph = try makeInMemoryGraph()
         let older = try await graph.createNote.execute(title: "Reference", body: "Pinned", source: .manual)
@@ -308,6 +413,28 @@ struct AppGraphTests {
         #expect(store.notes.map(\.id) == [older.id, newer.id])
         #expect(store.notes.first?.isPinned == true)
         #expect(store.isTogglingPinned(noteID: older.id) == false)
+    }
+
+    @Test
+    @MainActor
+    func notesStoreRetryRepeatsFailedCreate() async throws {
+        let graph = try makeInMemoryGraph()
+        let store = NotesStore(graph: graph)
+        await store.refresh()
+
+        _ = await store.createNote(
+            payload: .init(
+                title: "",
+                body: "",
+                source: .manual
+            )
+        )
+        let firstError = store.errorMessage
+        await store.retryLastOperation()
+
+        #expect(firstError != nil)
+        #expect(store.errorMessage != nil)
+        #expect(store.notes.isEmpty)
     }
 
     @Test
@@ -345,7 +472,7 @@ struct AppGraphTests {
             source: .manual
         )
 
-        #expect(created.displayTitle == "Untitled note")
+        #expect(created.displayTitle == "Some content")
     }
 
     @Test
